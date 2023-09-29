@@ -7,8 +7,9 @@ Author: Stijn Helsloot (stijn.helsloot@maastrichtuniversity.nl)
 
 from PySide6.QtWidgets import QWidget, QApplication, QTabWidget, QVBoxLayout
 from PySide6.QtCore import QThread
-from Gui_Library import Gui_Workers as GW
-from Gui_Library import Gui_Tab_Library as GTB
+import Code_Gui.Gui_Library.Gui_Workers as GW
+import Code_Gui.Gui_Library.Gui_Tab_Library as GTB
+import pyqtgraph as pg
 import sys
 
 class Window(QWidget):

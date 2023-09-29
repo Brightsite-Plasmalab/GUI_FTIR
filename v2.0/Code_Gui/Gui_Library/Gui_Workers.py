@@ -11,8 +11,8 @@ from PySide6.QtCore import QObject, Signal
 import pyqtgraph as pg
 from radis import Spectrum
 import numpy as np
-from Code_Gui.Gui_General_Code import General_Functions_Library as GFL
-from Code_Gui.Gui_General_Code import Gas_Mixtures_Spectra_Library as GMSL
+import Code_Gui.Gui_General_Code.General_Functions_Library as GFL
+import Code_Gui.Gui_General_Code.Gas_Mixtures_Spectra_Library as GMSL
 import h5py
 import os
 import os.path as op
@@ -165,7 +165,6 @@ class WorkerPlotter(QObject):
         self.dict_plots[name].p1.x_fit = x
         self.dict_plots[name].p2.x_res = x
 
-
         if self.parent.tab_ftir_fitting.absorbance_bool:
             self.dict_plots[name].p1.y_exp = GFL.tr_to_ab(y)
             self.dict_plots[name].p1.y_fit = GFL.tr_to_ab(np.ones(len(self.dict_plots[name].p1.x_fit)))
@@ -205,6 +204,9 @@ class WorkerFTIRFitter(QObject):
         self.fitting_functions.append(GMSL.spectra_fit_3_molecules)
         self.fitting_functions.append(GMSL.spectra_fit_4_molecules)
         self.fitting_functions.append(GMSL.spectra_fit_5_molecules)
+        self.fitting_functions.append(GMSL.spectra_fit_6_molecules)
+        self.fitting_functions.append(GMSL.spectra_fit_7_molecules)
+        self.fitting_functions.append(GMSL.spectra_fit_8_molecules)
         self.parent = parent
         self.dict_molecules = {}
 
@@ -250,7 +252,7 @@ class WorkerFTIRFitter(QObject):
             list_pressure = self.tab.list_ftir_pressure
             if len(list_pressure) == 1:
                 pressure = list_pressure[0]
-                list_pressure = np.ones(len_files_in_dir) * pressure
+                list_pressure = np.zeros(len_files_in_dir)
                 bool_pressure = True
             elif len(list_pressure) == len_files_in_dir and len(list_pressure) != 0:
                 pressure = list_pressure[index]
@@ -259,23 +261,15 @@ class WorkerFTIRFitter(QObject):
             list_temperature = self.tab.list_ftir_temperature
             if len(list_temperature) == 1:
                 temperature = list_temperature[0]
-                list_temperature = np.ones(len_files_in_dir) * temperature
+                list_temperature = np.zeros(len_files_in_dir)
                 bool_temperature = True
             elif len(list_temperature) == len_files_in_dir and len(list_temperature) != 0:
                 temperature = list_temperature[index]
                 bool_temperature = True
 
-            list_pathlength = self.tab.list_ftir_pathlength
+            pathlength = self.tab.list_ftir_pathlength[0]
 
-            if len(list_pathlength) == 1:
-                pathlength = list_pathlength[0]
-                list_pathlength = np.ones(len_files_in_dir) * pathlength
-                bool_pathlength = True
-            elif len(list_pathlength) == len_files_in_dir and len(list_pathlength) != 0:
-                pathlength = list_pathlength[index]
-                bool_pathlength = True
-
-            if bool_molecules and bool_pathlength and bool_temperature and bool_pressure:
+            if bool_molecules and bool_temperature and bool_pressure:
                 if not op.exists(self.tab.directory_save_invenioR_processed + "\\" + "Measurement_file.h5"):
                     hf = h5py.File(self.tab.directory_save_invenioR_processed + "\\" + "Measurement_file.h5",
                                    "w")
@@ -284,7 +278,6 @@ class WorkerFTIRFitter(QObject):
                                                        + " ....")
 
                 list_time = []
-
                 hour_0 = 0
                 minute_0 = 0
                 second_0 = 0
@@ -306,43 +299,31 @@ class WorkerFTIRFitter(QObject):
                     except:
                         list_time.append(0)
 
-                list_offset_min = np.zeros(len_files_in_dir)
-                list_offset_max = np.zeros(len_files_in_dir)
-                list_offset = np.zeros(len_files_in_dir)
-                list_slit = np.zeros(len_files_in_dir)
-
-
                 with h5py.File(self.tab.directory_save_invenioR_processed + "\\" + "Measurement_file.h5", "r+") as hf:
                     keys = list(hf.keys())
+                    if "File Names" not in keys:
+                        hf.create_dataset("File Names", data=files_in_directory)
+                    elif not len(hf["File Names"][:] == len_files_in_dir):
+                        del hf["File Names"]
+                        hf.create_dataset("File Names", data=files_in_directory)
+
                     if "Time" not in keys:
                         hf.create_dataset("Time", data=list_time)
                     elif not len(hf["Time"][:]) == len_files_in_dir:
                         del hf["Time"]
                         hf.create_dataset("Time", data=list_time)
 
-                    if "Offset_minimum" not in keys:
-                        hf.create_dataset("Offset_minimum", data=list_offset_min)
-                    elif not len(hf["Offset_minimum"][:]) == len_files_in_dir:
-                        del hf["Offset_minimum"]
-                        hf.create_dataset("Offset_minimum", data=list_offset_min)
+                    if "Pressure" not in keys:
+                        hf.create_dataset("Pressure", data=list_pressure)
+                    elif not len(hf["Pressure"][:]) == len_files_in_dir:
+                        del hf["Pressure"]
+                        hf.create_dataset("Pressure", data=list_pressure)
 
-                    if "Offset_maximum" not in keys:
-                        hf.create_dataset("Offset_maximum", data=list_offset_max)
-                    elif not len(hf["Offset_maximum"][:]) == len_files_in_dir:
-                        del hf["Offset_maximum"]
-                        hf.create_dataset("Offset_maximum", data=list_offset_max)
-
-                    if "Offset" not in keys:
-                        hf.create_dataset("Offset", data=list_offset)
-                    elif not len(hf["Offset"][:]) == len_files_in_dir:
-                        del hf["Offset"]
-                        hf.create_dataset("Offset", data=list_offset)
-
-                    if "Slit_size" not in keys:
-                        hf.create_dataset("Slit_size", data=list_slit)
-                    elif not len(hf["Slit_size"][:]) == len_files_in_dir:
-                        del hf["Slit_size"]
-                        hf.create_dataset("Slit_size", data=list_slit)
+                    if "Temperature" not in keys:
+                        hf.create_dataset("Temperature", data=list_temperature)
+                    elif not len(hf["Pressure"][:]) == len_files_in_dir:
+                        del hf["Temperature"]
+                        hf.create_dataset("Temperature", data=list_temperature)
 
                     for mol_i in range(len(list_molecules)):
                         if list_molecules[mol_i] not in list(dict_molecules.keys()):
@@ -357,7 +338,6 @@ class WorkerFTIRFitter(QObject):
                             hf.create_dataset(list_molecules[mol_i] + "_concentration",
                                               data=np.zeros(len(files_in_directory)))
 
-
                 try:
                     data_wavelength = np.array(data.get_range("AB")[0:-1])
                     data_transmission = np.array(data["AB"][0:-1])
@@ -367,32 +347,43 @@ class WorkerFTIRFitter(QObject):
 
                 self.wlmin = self.parent.tab_ftir_fitting.wavenumber_min
                 self.wlmax = self.parent.tab_ftir_fitting.wavenumber_max
+                self.wlmin_j = np.where(data_wavelength == GFL.take_closest(data_wavelength, self.wlmin))[0][0]
+                self.wlmax_j = np.where(data_wavelength == GFL.take_closest(data_wavelength, self.wlmax))[0][0]
 
-                for j in range(len(data_wavelength)):
-                    if data_wavelength[j] >= self.wlmin:
-                        self.wlmin_j = j
-                    if data_wavelength[j] >= self.wlmax:
-                        self.wlmax_j = j
+
+                if self.parent.tab_ftir_fitting.background_bool and self.inner_tab.background == "" :
+                    self.inner_tab.background = files_in_directory[0]
 
                 if self.inner_tab.background != "":
                     self.w_background, self.t_background = self.inner_tab.w_dict[files_in_directory[0]], \
                         self.inner_tab.t_dict[files_in_directory[0]]
-                    self.w_background = self.w_background[self.wlmax_j: self.wlmin_j]
-                    self.t_background = self.t_background[self.wlmax_j: self.wlmin_j]
+                    if self.wlmax_j > self.wlmin_j:
+                        self.w_background = self.w_background[self.wlmin_j:self.wlmax_j]
+                        self.t_background = self.t_background[self.wlmin_j:self.wlmax_j]
+                    else:
+                        self.w_background = self.w_background[self.wlmax_j: self.wlmin_j]
+                        self.t_background = self.t_background[self.wlmax_j: self.wlmin_j]
                     self.a_background = GFL.tr_to_ab(self.t_background)
                 else:
-                    self.a_background = np.zeros(len(data_wavelength))[self.wlmax_j: self.wlmin_j]
+                    if self.wlmax_j > self.wlmin_j:
+                        self.a_background = np.zeros(len(data_wavelength))[self.wlmin_j:self.wlmax_j]
+                    else:
+                        self.a_background = np.zeros(len(data_wavelength))[self.wlmax_j: self.wlmin_j]
 
                 if self.inner_tab.background != current_file:
                     w_exp, t_exp = self.inner_tab.w_dict[current_file], self.inner_tab.t_dict[current_file]
 
-                    w_exp = w_exp[self.wlmax_j: self.wlmin_j]
-                    t_exp = t_exp[self.wlmax_j: self.wlmin_j]
+                    if self.wlmax_j > self.wlmin_j:
+
+                        w_exp = w_exp[self.wlmin_j:self.wlmax_j]
+                        t_exp = t_exp[self.wlmin_j:self.wlmax_j]
+                    else:
+                        w_exp = w_exp[self.wlmax_j: self.wlmin_j]
+                        t_exp = t_exp[self.wlmax_j: self.wlmin_j]
                     a_exp = GFL.tr_to_ab(t_exp)
                     bas = GFL.fit_baseline(w_exp, a_exp, self.a_background, True)
                     a_exp_baseline_corrected = a_exp - bas
                     t_exp_baseline_corrected = GFL.ab_to_tr(a_exp_baseline_corrected)
-
                     dict_molecules = {}
                     for mol_i in range(len(list_molecules)):
                         dict_molecules[list_molecules[mol_i]] = 0.001
@@ -406,13 +397,12 @@ class WorkerFTIRFitter(QObject):
                         spectrum_dictionary[molecule] = GFL.spectrum_in_air_creator(mol=molecule, mf=dict_molecules[molecule],
                                                                                     pres=pressure, temp=temperature,
                                                                                     path_l=pathlength,
-                                                                                    wl_min=self.wlmin, wl_max=self.wlmax, step=0.002)
+                                                                                    wl_min=self.wlmin, wl_max=self.wlmax, step=0.001)
                         dict_w[molecule] = spectrum_dictionary[molecule].get("transmittance_noslit")[0]
                         dict_t[molecule] = spectrum_dictionary[molecule].get("transmittance_noslit")[1]
 
                     GMSL.storage_for_dict(dict_w, dict_t, pathlength, self.tab.slit_size, self.tab.offset_left,
                                           self.tab.offset_right)
-
                     model = Model(self.fitting_functions[len(list_molecules) - 1])
                     if len(list_molecules) == 1:
                         params = model.make_params(c1=1)
@@ -424,17 +414,21 @@ class WorkerFTIRFitter(QObject):
                         params = model.make_params(c1=1,c2=1,c3=1,c4=1)
                     elif len(list_molecules) == 5:
                         params = model.make_params(c1=1,c2=1,c3=1,c4=1,c5=1)
+                    elif len(list_molecules) == 6:
+                        params = model.make_params(c1=1, c2=1, c3=1, c4=1, c5=1, c6=1)
+                    elif len(list_molecules) == 7:
+                        params = model.make_params(c1=1, c2=1, c3=1, c4=1, c5=1, c6=1, c7=1)
+                    elif len(list_molecules) == 8:
+                        params = model.make_params(c1=1, c2=1, c3=1, c4=1, c5=1, c6=1, c7=1, c8=1)
 
                     for i in range(len(list_molecules)):
                         params['c' + str(i+1)].set(min=-0.001, max=1000)
 
-                    result = model.fit(t_exp, params, w=w_exp)
+                    result = model.fit(t_exp_baseline_corrected, params, w=w_exp)
 
                     c_list = []
                     for i in range(len(list_molecules)):
-                        print(result.best_values)
                         c_list.append(result.best_values['c' + str(i+1)])
-
 
                     spectrum_dictionary_final = {}
                     molecule_final = list(dict_molecules.keys())[0]
@@ -450,7 +444,7 @@ class WorkerFTIRFitter(QObject):
                                                                                           pres=pressure, temp=temperature,
                                                                                           path_l=pathlength,
                                                                                           wl_min=self.wlmin, wl_max=self.wlmax,
-                                                                                          step=0.002)
+                                                                                          step=0.001)
                         dict_w_final[molecule] = spectrum_dictionary_final[molecule].get("transmittance_noslit")[0]
                         dict_t_final[molecule] = spectrum_dictionary_final[molecule].get("transmittance_noslit")[1]
                         dict_a_final[molecule] = GFL.tr_to_ab(dict_t_final[molecule])
@@ -459,6 +453,7 @@ class WorkerFTIRFitter(QObject):
                         else:
                             a_full += dict_a_final[molecule]
                     t_full = GFL.ab_to_tr(a_full)
+
                     spec_new2 = Spectrum({"wavenumber": dict_w_final[molecule_final], "transmittance_noslit": t_full},
                                          wunit='cm-1',
                                          units={"transmittance_noslit": ""})
@@ -466,16 +461,18 @@ class WorkerFTIRFitter(QObject):
                     spec_new2.apply_slit(self.tab.slit_size, unit="cm-1", norm_by="area", inplace=True)
 
                     w_temp, t_temp = spec_new2.get("transmittance")
+                    offset_a = (self.tab.offset_right - self.tab.offset_left) / (4000 - 1000)
+                    offset_b = self.tab.offset_right - offset_a * 4000
 
-                    offset_list = np.linspace(self.tab.offset_left, self.tab.offset_right, len(w_temp))
+                    list_offset_temp = offset_a * w_temp + offset_b
 
                     w_new_temp = np.zeros(len(w_temp))
                     for i in range(len(w_temp)):
-                        w_new_temp[i] = w_temp[i] + offset_list[i]
-                    spec_new2 = Spectrum({"wavenumber": w_new_temp, "transmittance": t_temp}, wunit='cm-1',
+                        w_new_temp[i] = w_temp[i] + list_offset_temp[i]
+                    spec_new_final = Spectrum({"wavenumber": w_new_temp, "transmittance": t_temp}, wunit='cm-1',
                                          units={"transmittance": ""}, conditions={"path_length": pathlength})
-                    spec_new2.resample(w_exp, inplace=True)
-                    w_new2, t_new2 = spec_new2.get("transmittance")
+                    spec_new_final.resample(w_exp, inplace=True)
+                    w_new2, t_new2 = spec_new_final.get("transmittance")
                     residual = t_exp - t_new2
                     for mol_i in range(len(dict_molecules)):
                         molecule = list(dict_molecules.keys())[mol_i]
@@ -495,14 +492,17 @@ class WorkerFTIRFitter(QObject):
                     with h5py.File(
                             self.parent.tab_ftir_fitting.directory_save_invenioR_processed + "\\" + "Measurement_file.h5",
                             "r+") as hf:
-                        #hf["Offset_minimum"][index] = list_offset_min[index]
-                        #hf["Offset_maximum"][index] = list_offset_max[index]
-                        hf["Slit_size"][index] = list_slit[index]
-                        hf["Offset"][index] = list_offset[index]
+                        if hf["Temperature"][index] != temperature:
+                            hf["Temperature"][index] = temperature
+                        if hf["Pressure"][index] != pressure:
+                            hf["Pressure"][index] = pressure
+
                         for mol_i in range(len(list_molecules)):
                             hf[list_molecules[mol_i] + "_concentration"][index] = dict_molecules[list_molecules[mol_i]]
 
                     self.tab.layout.label_info_fit.setText("Fitting for " + current_file + " made")
+                else:
+                    self.tab.layout.label_info_fit.setText("No fit, background-file")
             else:
                 self.tab.layout.label_info_fit.setText("Can't fit, "
                                                        "incorrect/no molecules, pressure, "
@@ -517,7 +517,7 @@ class WorkerFTIRFitter(QObject):
         dict_molecules = {}
         all_fits_made_bool = False
 
-        time_list = []
+        list_time = []
         hour_0 = 0
         minute_0 = 0
         second_0 = 0
@@ -531,17 +531,13 @@ class WorkerFTIRFitter(QObject):
                     minute_0 = int(minute)
                     second_0 = int(second)
                     time_spend = 0
-                    time_list.append(time_spend)
+                    list_time.append(time_spend)
                 else:
                     time_spend = 60 * 60 * (int(hour) - hour_0) + 60 * (int(minute) - minute_0) + (
                             int(second) - second_0)
-                    time_list.append(time_spend)
+                    list_time.append(time_spend)
             except:
-                time_list.append(0)
-        list_offset = np.zeros(len_files_in_dir)
-        list_offset_left = np.zeros(len_files_in_dir)
-        list_offset_right = np.zeros(len_files_in_dir)
-        slit_list = np.zeros(len_files_in_dir)
+                list_time.append(0)
 
         bool_molecules = False
         bool_pressure = False
@@ -578,26 +574,34 @@ class WorkerFTIRFitter(QObject):
 
         self.wlmin = self.parent.tab_ftir_fitting.wavenumber_min
         self.wlmax = self.parent.tab_ftir_fitting.wavenumber_max
+
         data_temp = self.inner_tab.array_data[0]
         try:
             data_wavelength_temp = np.array(data_temp.get_range("AB")[0:-1])
         except:
             data_wavelength_temp = data_temp[0]
 
-        for j in range(len(data_wavelength_temp)):
-            if data_wavelength_temp[j] >= self.wlmin:
-                self.wlmin_j = j
-            if data_wavelength_temp[j] >= self.wlmax:
-                self.wlmax_j = j
+        self.wlmin_j = np.where(data_wavelength_temp == GFL.take_closest(data_wavelength_temp, self.wlmin))[0][0]
+        self.wlmax_j = np.where(data_wavelength_temp == GFL.take_closest(data_wavelength_temp, self.wlmax))[0][0]
+
+        if self.parent.tab_ftir_fitting.background_bool and self.inner_tab.background == "":
+            self.inner_tab.background = files_in_directory[0]
 
         if self.inner_tab.background != "":
             self.w_background, self.t_background = self.inner_tab.w_dict[files_in_directory[0]], \
                 self.inner_tab.t_dict[files_in_directory[0]]
-            self.w_background = self.w_background[self.wlmax_j: self.wlmin_j]
-            self.t_background = self.t_background[self.wlmax_j: self.wlmin_j]
+            if self.wlmax_j > self.wlmin_j:
+                self.w_background = self.w_background[self.wlmin_j:self.wlmax_j]
+                self.t_background = self.t_background[self.wlmin_j:self.wlmax_j]
+            else:
+                self.w_background = self.w_background[self.wlmax_j: self.wlmin_j]
+                self.t_background = self.t_background[self.wlmax_j: self.wlmin_j]
             self.a_background = GFL.tr_to_ab(self.t_background)
         else:
-            self.a_background = np.zeros(len(data_wavelength_temp))[self.wlmax_j: self.wlmin_j]
+            if self.wlmax_j > self.wlmin_j:
+                self.a_background = np.zeros(len(data_wavelength_temp))[self.wlmin_j:self.wlmax_j]
+            else:
+                self.a_background = np.zeros(len(data_wavelength_temp))[self.wlmax_j: self.wlmin_j]
 
 
         for index in range(len_files_in_dir):
@@ -644,30 +648,17 @@ class WorkerFTIRFitter(QObject):
                         with h5py.File(self.tab.directory_save_invenioR_processed + "\\" + "Measurement_file.h5",
                                        "r+") as hf:
                             keys = list(hf.keys())
+                            if "File Names" not in keys:
+                                hf.create_dataset("File Names", data=files_in_directory)
+                            elif not len(hf["File Names"][:] == len_files_in_dir):
+                                del hf["File Names"]
+                                hf.create_dataset("File Names", data=files_in_directory)
+
                             if "Time" not in keys:
-                                hf.create_dataset("Time", data=time_list)
+                                hf.create_dataset("Time", data=list_time)
                             elif not len(hf["Time"][:]) == len_files_in_dir:
                                 del hf["Time"]
-                                hf.create_dataset("Time", data=time_list)
-
-                            if "Offset_left" not in keys:
-                                hf.create_dataset("Offset_left", data=list_offset_left)
-                            elif not len(hf["Offset_left"][:]) == len_files_in_dir:
-                                del hf["Offset_left"]
-                                hf.create_dataset("Offset_left", data=list_offset_left)
-
-                            if "Offset_right" not in keys:
-                                hf.create_dataset("Offset_right", data=list_offset_right)
-                            elif not len(hf["Offset_right"][:]) == len_files_in_dir:
-                                del hf["Offset_right"]
-                                hf.create_dataset("Offset_right", data=list_offset_right)
-
-
-                            if "Slit_size" not in keys:
-                                hf.create_dataset("Slit_size", data=slit_list)
-                            elif not len(hf["Slit_size"][:]) == len_files_in_dir:
-                                del hf["Slit_size"]
-                                hf.create_dataset("Slit_size", data=slit_list)
+                                hf.create_dataset("Time", data=list_time)
 
                             if "Pressure" not in keys:
                                 hf.create_dataset("Pressure", data=list_pressure)
@@ -694,22 +685,27 @@ class WorkerFTIRFitter(QObject):
                                     hf.create_dataset(list_molecules[mol_i] + "_concentration",
                                                       data=np.zeros(len(files_in_directory)))
 
-                        try:
-                            data_wavelength = np.array(data.get_range("AB")[0:-1])
-                            data_transmission = np.array(data["AB"][0:-1])
-                        except:
-                            data_wavelength = data[0]
-                            data_transmission = data[1]
-
-
-                        s_exp = Spectrum({"wavenumber": data_wavelength, "transmittance": data_transmission}, wunit='cm-1',
-                                         units={"transmittance": ""})
-                        w_exp, t_exp = s_exp.get("transmittance")
+                            for mol_i in range(len(list_molecules)):
+                                if list_molecules[mol_i] not in list(dict_molecules.keys()):
+                                    dict_molecules[list_molecules[mol_i]] = np.zeros(len(files_in_directory))
+                                elif not len(dict_molecules[list_molecules[mol_i]]) == len_files_in_dir:
+                                    dict_molecules[list_molecules[mol_i]] = np.zeros(len(files_in_directory))
+                                if list_molecules[mol_i] + "_concentration" not in keys:
+                                    hf.create_dataset(list_molecules[mol_i] + "_concentration",
+                                                      data=np.zeros(len(files_in_directory)))
+                                elif not len(hf[list_molecules[mol_i] + "_concentration"]) == len_files_in_dir:
+                                    del hf[list_molecules[mol_i] + "_concentration"]
+                                    hf.create_dataset(list_molecules[mol_i] + "_concentration",
+                                                      data=np.zeros(len(files_in_directory)))
 
                         w_exp, t_exp = self.inner_tab.w_dict[current_file], self.inner_tab.t_dict[current_file]
 
-                        w_exp = w_exp[self.wlmax_j: self.wlmin_j]
-                        t_exp = t_exp[self.wlmax_j: self.wlmin_j]
+                        if self.wlmax_j > self.wlmin_j:
+                            w_exp = w_exp[self.wlmin_j:self.wlmax_j]
+                            t_exp = t_exp[self.wlmin_j:self.wlmax_j]
+                        else:
+                            w_exp = w_exp[self.wlmax_j: self.wlmin_j]
+                            t_exp = t_exp[self.wlmax_j: self.wlmin_j]
                         a_exp = GFL.tr_to_ab(t_exp)
                         bas = GFL.fit_baseline(w_exp, a_exp, self.a_background, True)
                         a_exp_baseline_corrected = a_exp - bas
@@ -728,7 +724,7 @@ class WorkerFTIRFitter(QObject):
                                                                                         pres=pressure, temp=temperature,
                                                                                         path_l=pathlength,
                                                                                         wl_min=self.wlmin, wl_max=self.wlmax,
-                                                                                        step=0.002)
+                                                                                        step=0.001)
                             dict_w[molecule] = spectrum_dictionary[molecule].get("transmittance_noslit")[0]
                             dict_t[molecule] = spectrum_dictionary[molecule].get("transmittance_noslit")[1]
 
@@ -746,10 +742,16 @@ class WorkerFTIRFitter(QObject):
                             params = model.make_params(c1=1, c2=1, c3=1, c4=1)
                         elif len(list_molecules) == 5:
                             params = model.make_params(c1=1, c2=1, c3=1, c4=1, c5=1)
+                        elif len(list_molecules) == 6:
+                            params = model.make_params(c1=1, c2=1, c3=1, c4=1, c5=1, c6=1)
+                        elif len(list_molecules) == 7:
+                            params = model.make_params(c1=1, c2=1, c3=1, c4=1, c5=1, c6=1, c7=1)
+                        elif len(list_molecules) == 8:
+                            params = model.make_params(c1=1, c2=1, c3=1, c4=1, c5=1, c6=1, c7=1, c8=1)
 
                         for i in range(len(list_molecules)):
                             params['c' + str(i + 1)].set(min=-0.001, max=1000)
-                        result = model.fit(t_exp, params, w=w_exp)
+                        result = model.fit(t_exp_baseline_corrected, params, w=w_exp)
 
                         c_list = []
                         for i in range(len(list_molecules)):
@@ -769,7 +771,7 @@ class WorkerFTIRFitter(QObject):
                                                                                               temp=temperature,
                                                                                               path_l=pathlength,
                                                                                               wl_min=self.wlmin, wl_max=self.wlmax,
-                                                                                              step=0.002)
+                                                                                              step=0.001)
                             dict_w_final[molecule] = spectrum_dictionary_final[molecule].get("transmittance_noslit")[0]
                             dict_t_final[molecule] = spectrum_dictionary_final[molecule].get("transmittance_noslit")[1]
                             dict_a_final[molecule] = GFL.tr_to_ab(dict_t_final[molecule])
@@ -786,7 +788,10 @@ class WorkerFTIRFitter(QObject):
 
                         w_temp, t_temp = spec_new2.get("transmittance")
 
-                        list_offset_temp = np.linspace(self.tab.offset_left, self.tab.offset_right, len(w_temp))
+                        offset_a = (self.tab.offset_right - self.tab.offset_left) / (4000 - 1000)
+                        offset_b = self.tab.offset_right - offset_a * 4000
+
+                        list_offset_temp = offset_a * w_temp + offset_b
 
                         w_new_temp = np.zeros(len(w_temp))
                         for i in range(len(w_temp)):
@@ -815,9 +820,10 @@ class WorkerFTIRFitter(QObject):
                             ["ftir_fitting_" + current_file, w_new2, t_exp, t_new2, residual])
                         with h5py.File(self.tab.directory_save_invenioR_processed + "\\" + "Measurement_file.h5",
                                        "r+") as hf:
-                            hf["Offset_left"][index] = list_offset_left[index]
-                            hf["Offset_right"][index] = list_offset_right[index]
-                            hf["Slit_size"][index] = slit_list[index]
+                            if hf["Temperature"][index] != temperature:
+                                hf["Temperature"][index] = temperature
+                            if hf["Pressure"][index] != pressure:
+                                hf["Pressure"][index] = pressure
                             for mol_i in range(len(list_molecules)):
                                 hf[list_molecules[mol_i] + "_concentration"][index] = dict_molecules[list_molecules[mol_i]][index]
 
@@ -829,7 +835,8 @@ class WorkerFTIRFitter(QObject):
                                                                                 "temperature or pathlength")
                         all_fits_made_bool = False
                         break
-
+            else:
+                self.tab.layout.label_info_fit.setText("No fit, background-file")
         if all_fits_made_bool:
             self.tab.layout.label_info_fit.setText("Fitting for all files made")
 
@@ -897,7 +904,6 @@ class WorkerFTIRSimulation(QObject):
                                                                                   wl_min=self.wlmin_new,
                                                                                   wl_max=self.wlmax_new, step=0.002)
                     if self.slitsize_new != 0:
-
                         self.dict_spectrum[mol_i].apply_slit(self.slitsize_new, unit="cm-1",
                                                              norm_by="area", inplace=True, shape="gaussian")
                         self.dict_w_new[mol_i] = self.dict_spectrum[mol_i].get("transmittance")[0]
@@ -961,6 +967,8 @@ class WorkerFTIRSimulation(QObject):
 
         except:
             self.bool_remake = False
+            self.parent.worker_plotting.update_single_transmission_plot(
+                ["Simulated Data", range(100), np.zeros(100)])
             self.tab.layout.label_simulation.setText("Can't do simulation, not enough conditions given")
 
 

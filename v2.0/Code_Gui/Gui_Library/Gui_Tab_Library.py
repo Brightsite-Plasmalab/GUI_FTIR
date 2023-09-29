@@ -2,7 +2,7 @@
 File containing all of the code to create the Tabs shown within the GUI
 """
 
-from Code_Gui.Gui_General_Code import General_Functions_Library as GFL
+import Code_Gui.Gui_General_Code.General_Functions_Library as GFL
 from PySide6.QtCore import QObject, Signal, Qt
 from PySide6.QtWidgets import QWidget, QLabel, QTabWidget, QVBoxLayout, QHBoxLayout, QGridLayout, \
     QLineEdit, QPushButton, QCheckBox, QSizePolicy
@@ -22,7 +22,7 @@ class create_tab_ftir_simulator(QWidget):
         super().__init__()
         self.absorbance_bool = False
         self.molecule_list = ["H2O", "CO2", "CO", "CH4", "NO", "NO2", "N2O", "HNO3", "C2H2", "C2H4", "O3", "NH3", "OH",
-                              "C2H6", "CH3OH", "C4H2", "H2CO", "HCN", "H2O2", "O", "HCOOH", "HO2", "C2N2", "CH3OH" ]
+                              "C2H6", "CH3OH", "C4H2", "H2CO", "HCN", "H2O2", "O", "HCOOH", "HO2", "C2N2", "CH3OH"]
         self.len_table = len(self.molecule_list) / 6
         self.rows = len(self.molecule_list) / 6
         self.molecule_storage_for_simulation = {}
@@ -865,7 +865,7 @@ class create_inner_tab_ftir_fitting(QTabWidget):
             self.parent.tab_ftir_fitting.layout.addWidget(
                 self.parent.tab_ftir_fitting.layout.button_save_simulated_data_in_txt_all, 24, 4, 1, 2)
             self.parent.tab_ftir_fitting.layout.addWidget(
-                self.parent.tab_ftir_fitting.layout.button_save_simulated_data_as_png_all, 23, 6, 1, 2)
+                self.parent.tab_ftir_fitting.layout.button_save_simulated_data_as_png_all, 24, 6, 1, 2)
             self.parent.tab_ftir_fitting.layout.addWidget(
                 self.parent.tab_ftir_fitting.layout.label_save, 24, 8, 1, 2)
         except:
@@ -996,7 +996,7 @@ class create_inner_tab_ftir_fitting(QTabWidget):
                 self.signal_save_data_in_text_files.emit([self.parent.tab_ftir_fitting.directory_save_invenioR_processed,
                                                           current_file,
                                                           np.transpose([self.parent.worker_plotting.dict_plots[
-                                                                            "ftir_fitting_" + current_file].p1.x_exp,
+                                                                            "ftir_fitting_" + current_file].p1.x_fit,
                                                                         self.parent.worker_plotting.dict_plots[
                                                                             "ftir_fitting_" + current_file].p1.y_exp,
                                                                         self.parent.worker_plotting.dict_plots[
@@ -1047,7 +1047,7 @@ class create_inner_tab_ftir_fitting(QTabWidget):
                         [self.parent.tab_ftir_fitting.directory_save_invenioR_processed,
                          current_file,
                          np.transpose([self.parent.worker_plotting.dict_plots[
-                                           "ftir_fitting_" + current_file].p1.x_exp,
+                                           "ftir_fitting_" + current_file].p1.x_fit,
                                        self.parent.worker_plotting.dict_plots[
                                            "ftir_fitting_" + current_file].p1.y_exp,
                                        self.parent.worker_plotting.dict_plots[
@@ -1070,7 +1070,7 @@ class create_inner_tab_ftir_fitting(QTabWidget):
             if not bool_fit:
                 self.signal_save_data_as_png.emit([
                     self.parent.tab_ftir_fitting.directory_save_invenioR_processed, current_file,
-                    [self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.x_exp,
+                    [self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.x_fit,
                      self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.y_exp,
                      self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.y_fit,
                      self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p2.y_res],
@@ -1090,7 +1090,7 @@ class create_inner_tab_ftir_fitting(QTabWidget):
                 if not bool_fit:
                     self.signal_save_data_as_png.emit([
                         self.parent.tab_ftir_fitting.directory_save_invenioR_processed,current_file,
-                        [self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.x_exp,
+                        [self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.x_fit,
                          self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.y_exp,
                          self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p1.y_fit,
                          self.parent.worker_plotting.dict_plots["ftir_fitting_" + current_file].p2.y_res],

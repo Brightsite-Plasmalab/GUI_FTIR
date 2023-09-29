@@ -15,7 +15,7 @@ to fit in a different range than from 2200 to 4150 (as the offset boundaries are
 
 import os
 import os.path as op
-import General_Functions_Library as GFL
+from Code_Gui.Gui_General_Code import General_Functions_Library as GFL
 import numpy as np
 from radis import Spectrum
 import matplotlib.pyplot as plt

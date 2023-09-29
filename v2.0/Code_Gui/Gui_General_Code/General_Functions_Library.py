@@ -63,30 +63,20 @@ def spectrum_in_air_creator(mol, mf,pres, temp, path_l, wl_min, wl_max, step, di
     :param step: The step size (for the wavelength) one wants to simulate their spectrum for
     :return: Returns the created simulated spectrum.
     """
-
-    spectrum = rd.calc_spectrum(wl_min, wl_max, molecule=mol, isotope="all", pressure=pres, Tgas=temp,
+    iso = "all"
+    if mol == "NO2":
+            iso = 1
+    spectrum = rd.calc_spectrum(wl_min, wl_max, molecule=mol, isotope= iso, pressure=pres, Tgas=temp,
                                 wstep=step, path_length=path_l, databank="hitran", mole_fraction=mf, medium="air",
                                 warnings={"AccuracyError": "ignore"}, diluent=dil)
 
     return spectrum
 
-def take_closest(myList, myNumber):
-    """
-    Assumes myList is sorted. Returns closest value to myNumber.
 
-    If two numbers are equally close, return the smallest number.
-    """
-    pos = bisect_left(myList, myNumber)
-    if pos == 0:
-        return myList[0]
-    if pos == len(myList):
-        return myList[-1]
-    before = myList[pos - 1]
-    after = myList[pos]
-    if after - myNumber < myNumber - before:
-        return after
-    else:
-        return before
+def take_closest(array, value):
+    array = np.asarray(array)
+    idx = np.nanargmin((np.abs(array - value)))
+    return array[idx]
 
 def trold_to_trnew(Told, c_factor):
     """

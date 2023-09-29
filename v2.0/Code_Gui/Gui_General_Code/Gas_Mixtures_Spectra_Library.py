@@ -1,6 +1,6 @@
 from radis import Spectrum
 import numpy as np
-from Code_Gui.Gui_General_Code import General_Functions_Library as GFL
+import Code_Gui.Gui_General_Code.General_Functions_Library as GFL
 
 w_dict = {}
 t_dict = {}
@@ -208,6 +208,135 @@ def spectra_fit_5_molecules(w, c1, c2, c3,c4, c5):
     """
     global w_dict, t_dict
     c_list=[c1, c2, c3, c4, c5]
+    t_dict_new = {}
+    a_dict_new = {}
+    a_full = {}
+    for i in range(len(w_dict)):
+        t_dict_new[list(w_dict.keys())[i]] = GFL.trold_to_trnew(t_dict[list(w_dict.keys())[i]], c_list[i])
+        a_dict_new[list(w_dict.keys())[i]] = GFL.tr_to_ab(t_dict_new[list(w_dict.keys())[i]])
+        if i == 0:
+            a_full = a_dict_new[list(w_dict.keys())[i]]
+        else:
+            a_full += a_dict_new[list(w_dict.keys())[i]]
+
+    t_full = GFL.ab_to_tr(a_full)
+    molecule = list(w_dict.keys())[0]
+    spec_new = Spectrum({"wavenumber": w_dict[molecule], "transmittance_noslit": t_full}, wunit='cm-1',
+                        units={"transmittance_noslit": ""}, conditions={"path_length": pathlength})
+    spec_new.apply_slit(slit_size, unit="cm-1", norm_by="area", inplace=True)
+
+    w_temp, t_temp = spec_new.get("transmittance")
+    offset_a = (offset_right - offset_left) / (4000 - 1000)
+    offset_b = offset_right - offset_a * 4000
+
+    list_offset_temp = offset_a * w_temp + offset_b
+
+    w_new_temp = np.zeros(len(w_temp))
+    for i in range(len(w_temp)):
+        w_new_temp[i] = w_temp[i] + list_offset_temp[i]
+    spec_new = Spectrum({"wavenumber": w_new_temp, "transmittance": t_temp}, wunit='cm-1',
+                        units={"transmittance": ""}, conditions={"path_length": pathlength})
+
+    spec_new.resample(w, inplace=True)
+    w_new, t_new = spec_new.get("transmittance")
+
+    for i in range(len(t_new)):
+        if np.isnan(t_new[i]):
+            t_new[i] = 1
+    return t_new
+
+def spectra_fit_6_molecules(w, c1, c2, c3,c4, c5, c6):
+    """
+    See explanation of "spectra_linear_wavenumber_dependent_offset_1_molecule".
+    """
+    global w_dict, t_dict
+    c_list=[c1, c2, c3, c4, c5, c6]
+    t_dict_new = {}
+    a_dict_new = {}
+    a_full = {}
+    for i in range(len(w_dict)):
+        t_dict_new[list(w_dict.keys())[i]] = GFL.trold_to_trnew(t_dict[list(w_dict.keys())[i]], c_list[i])
+        a_dict_new[list(w_dict.keys())[i]] = GFL.tr_to_ab(t_dict_new[list(w_dict.keys())[i]])
+        if i == 0:
+            a_full = a_dict_new[list(w_dict.keys())[i]]
+        else:
+            a_full += a_dict_new[list(w_dict.keys())[i]]
+
+    t_full = GFL.ab_to_tr(a_full)
+    molecule = list(w_dict.keys())[0]
+    spec_new = Spectrum({"wavenumber": w_dict[molecule], "transmittance_noslit": t_full}, wunit='cm-1',
+                        units={"transmittance_noslit": ""}, conditions={"path_length": pathlength})
+    spec_new.apply_slit(slit_size, unit="cm-1", norm_by="area", inplace=True)
+
+    w_temp, t_temp = spec_new.get("transmittance")
+    offset_a = (offset_right - offset_left) / (4000 - 1000)
+    offset_b = offset_right - offset_a * 4000
+
+    list_offset_temp = offset_a * w_temp + offset_b
+
+    w_new_temp = np.zeros(len(w_temp))
+    for i in range(len(w_temp)):
+        w_new_temp[i] = w_temp[i] + list_offset_temp[i]
+    spec_new = Spectrum({"wavenumber": w_new_temp, "transmittance": t_temp}, wunit='cm-1',
+                        units={"transmittance": ""}, conditions={"path_length": pathlength})
+
+    spec_new.resample(w, inplace=True)
+    w_new, t_new = spec_new.get("transmittance")
+
+    for i in range(len(t_new)):
+        if np.isnan(t_new[i]):
+            t_new[i] = 1
+    return t_new
+
+def spectra_fit_7_molecules(w, c1, c2, c3,c4, c5, c6, c7):
+    """
+    See explanation of "spectra_linear_wavenumber_dependent_offset_1_molecule".
+    """
+    global w_dict, t_dict
+    c_list=[c1, c2, c3, c4, c5, c6, c7]
+    t_dict_new = {}
+    a_dict_new = {}
+    a_full = {}
+    for i in range(len(w_dict)):
+        t_dict_new[list(w_dict.keys())[i]] = GFL.trold_to_trnew(t_dict[list(w_dict.keys())[i]], c_list[i])
+        a_dict_new[list(w_dict.keys())[i]] = GFL.tr_to_ab(t_dict_new[list(w_dict.keys())[i]])
+        if i == 0:
+            a_full = a_dict_new[list(w_dict.keys())[i]]
+        else:
+            a_full += a_dict_new[list(w_dict.keys())[i]]
+
+    t_full = GFL.ab_to_tr(a_full)
+    molecule = list(w_dict.keys())[0]
+    spec_new = Spectrum({"wavenumber": w_dict[molecule], "transmittance_noslit": t_full}, wunit='cm-1',
+                        units={"transmittance_noslit": ""}, conditions={"path_length": pathlength})
+    spec_new.apply_slit(slit_size, unit="cm-1", norm_by="area", inplace=True)
+
+    w_temp, t_temp = spec_new.get("transmittance")
+    offset_a = (offset_right - offset_left) / (4000 - 1000)
+    offset_b = offset_right - offset_a * 4000
+
+    list_offset_temp = offset_a * w_temp + offset_b
+
+    w_new_temp = np.zeros(len(w_temp))
+    for i in range(len(w_temp)):
+        w_new_temp[i] = w_temp[i] + list_offset_temp[i]
+    spec_new = Spectrum({"wavenumber": w_new_temp, "transmittance": t_temp}, wunit='cm-1',
+                        units={"transmittance": ""}, conditions={"path_length": pathlength})
+
+    spec_new.resample(w, inplace=True)
+    w_new, t_new = spec_new.get("transmittance")
+
+    for i in range(len(t_new)):
+        if np.isnan(t_new[i]):
+            t_new[i] = 1
+    return t_new
+
+def spectra_fit_8_molecules(w, c1, c2, c3,c4, c5, c6, c7, c8):
+    """
+    See explanation of "spectra_linear_wavenumber_dependent_offset_1_molecule".
+    """
+    global w_dict, t_dict
+    c_list=[c1, c2, c3, c4, c5, c6, c7, c8]
     t_dict_new = {}
     a_dict_new = {}
     a_full = {}
