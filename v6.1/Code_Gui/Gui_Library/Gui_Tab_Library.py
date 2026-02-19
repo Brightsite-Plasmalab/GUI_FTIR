@@ -10,6 +10,8 @@ import os
 import numpy as np
 import os.path as op
 import radis as rd
+import sys
+import platform
 
 class create_tab_ftir_simulator(QWidget):
     signal_ftir_simulation_start = Signal(list)
@@ -278,16 +280,26 @@ class create_tab_ftir_simulator(QWidget):
 
     def button_pressed(self,s):
         if self.sender().text() == "Save directory":
-            self.directory_for_saving = self.layout.line_edit_directory.text().replace("\\", "\\\\") + "\\\\"
+            self.directory_for_saving = self.layout.line_edit_directory.text()
             print(self.directory_for_saving)
             if self.directory_for_saving == "":
                 self.layout.label_directory2.setText("No directory given.")
-            elif ("C:\\" not in self.directory_for_saving and "P:\\" not in self.directory_for_saving and
-                  "D:\\" not in self.directory_for_saving and "F:\\" not in self.directory_for_saving and
-                  "K:\\" not in self.directory_for_saving and "L:\\" not in self.directory_for_saving):
-                self.layout.label_directory2.setText("Incorrect directory given.")
+            elif platform.system() == "Windows":
+                self.directory_for_saving + "/"
+                if ("C:/" not in self.directory_for_saving and "P:/" not in self.directory_for_saving and
+                      "D:/" not in self.directory_for_saving and "F:/" not in self.directory_for_saving and
+                      "K:/" not in self.directory_for_saving and "L:/" not in self.directory_for_saving):
+                    self.layout.label_directory2.setText("Incorrect directory given.")
+                else:
+                    if not os.path.exists(self.directory_for_saving):
+                        os.makedirs(self.directory_for_saving)
+                        self.layout.label_directory2.setText("Directory exists.")
 
-            else:
+                    if os.path.exists(self.directory_for_saving):
+                        self.layout.label_directory2.setText("Directory exists.")
+            elif platform.system() == "Darwin":
+                if len(self.directory_for_saving) != 0 and self.directory_for_saving[-1] != '/':
+                    self.directory_for_saving += "/"
                 if not os.path.exists(self.directory_for_saving):
                     os.makedirs(self.directory_for_saving)
                     self.layout.label_directory2.setText("Directory exists.")
@@ -499,17 +511,17 @@ class create_tab_ftir_fitting(QWidget):
         # Create fitting parameters row
         self.layout.label_slitsize = QLabel("Fitting parameters: \t\t\t\t\t Slit size: ")
         self.layout.label_slitsize.setStyleSheet("font: bold ; font-size:10pt")
-        self.layout.line_edit_slitsize = QLineEdit("0.2811189105899404")
+        self.layout.line_edit_slitsize = QLineEdit("0.2768186233821143")
         self.layout.line_edit_slitsize.textChanged.connect(lambda: self.text_changed("Slit size"))
         self.layout.line_edit_slitsize.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        self.layout.label_offset_left = QLabel("Offset 1000 cm-1 (if known): ")
-        self.layout.label_offset_left.setStyleSheet("font: bold ; font-size:10pt")
-        self.layout.line_edit_offset_left = QLineEdit("0")
-        self.layout.line_edit_offset_left.textChanged.connect(lambda: self.text_changed("Offset left"))
-        self.layout.label_offset_right = QLabel("Offset 4000 cm-1 (if known): ")
-        self.layout.label_offset_right.setStyleSheet("font: bold ; font-size:10pt")
-        self.layout.line_edit_offset_right = QLineEdit("-0.07691036347075944")
-        self.layout.line_edit_offset_right.textChanged.connect(lambda: self.text_changed("Offset right"))
+        self.layout.label_k0 = QLabel("k0 (if known): ")
+        self.layout.label_k0.setStyleSheet("font: bold ; font-size:10pt")
+        self.layout.line_edit_k0 = QLineEdit("-0.001120285207139915")
+        self.layout.line_edit_k0.textChanged.connect(lambda: self.text_changed("k0"))
+        self.layout.label_k1 = QLabel("k1 (if known): ")
+        self.layout.label_k1.setStyleSheet("font: bold ; font-size:10pt")
+        self.layout.line_edit_k1 = QLineEdit("1.0001065125867772")
+        self.layout.line_edit_k1.textChanged.connect(lambda: self.text_changed("k1"))
         self.layout.button_fit_parameters = QPushButton("Save fitting parameters")
         self.layout.button_fit_parameters.clicked.connect(self.button_pressed)
         self.layout.label_fit_parameters_saved = QLabel("No fitting parameters saved yet")
@@ -517,10 +529,10 @@ class create_tab_ftir_fitting(QWidget):
 
         self.layout.addWidget(self.layout.label_slitsize, 5, 0,1,2)
         self.layout.addWidget(self.layout.line_edit_slitsize, 5, 2,1,1)
-        self.layout.addWidget(self.layout.label_offset_left, 5, 3,1,1)
-        self.layout.addWidget(self.layout.line_edit_offset_left, 5, 4,1,1)
-        self.layout.addWidget(self.layout.label_offset_right, 5, 5,1,1)
-        self.layout.addWidget(self.layout.line_edit_offset_right, 5, 6, 1, 1)
+        self.layout.addWidget(self.layout.label_k0, 5, 3,1,1)
+        self.layout.addWidget(self.layout.line_edit_k0, 5, 4,1,1)
+        self.layout.addWidget(self.layout.label_k1, 5, 5,1,1)
+        self.layout.addWidget(self.layout.line_edit_k1, 5, 6, 1, 1)
         self.layout.addWidget(self.layout.button_fit_parameters, 5, 7, 1, 1)
         self.layout.addWidget(self.layout.label_fit_parameters_saved, 5, 8,1,2)
 
@@ -590,23 +602,38 @@ class create_tab_ftir_fitting(QWidget):
             self.layout.label_wavenumber.setText("Maximum wavenumber changed, no wavenumbers stored yet")
         elif s == "Slit size":
             self.layout.label_fit_parameters_saved.setText("Slit size was changed")
-        elif s == "Offset left":
-            self.layout.label_fit_parameters_saved.setText("Offset 1000 cm-1 was changed")
-        elif s == "Offset right":
-            self.layout.label_fit_parameters_saved.setText("Offset 4000 cm-1 was changed")
+        elif s == "k0":
+            self.layout.label_fit_parameters_saved.setText("k0 was changed")
+        elif s == "k1":
+            self.layout.label_fit_parameters_saved.setText("k1 was changed")
 
     def button_pressed(self,s):
         if self.sender().text() == "Create directory":
-            self.directory_data_InvenioR = self.layout.line_edit_directory.text().replace("\\", "\\\\") + "\\\\"
-            self.directory_save_invenioR_processed = self.layout.line_edit_directory.text() + "\\Processed_Data"
-
-            if self.directory_save_invenioR_processed == "":
+            self.directory_data_InvenioR = self.layout.line_edit_directory.text()
+            if self.directory_data_InvenioR == "":
                 self.layout.label_directory2.setText("No directory given.")
-            elif ("C:\\" not in self.directory_data_InvenioR and "P:\\" not in self.directory_data_InvenioR and
-                  "D:\\" not in self.directory_data_InvenioR and "F:\\" not in self.directory_data_InvenioR and
-                  "K:\\" not in self.directory_data_InvenioR and "L:\\" not in self.directory_data_InvenioR):
-                self.layout.label_directory2.setText("Incorrect directory given.")
-            else:
+            elif platform.system() == "Windows":
+                if ("C:\\" not in self.directory_data_InvenioR and "P:\\" not in self.directory_data_InvenioR and
+                      "D:\\" not in self.directory_data_InvenioR and "F:\\" not in self.directory_data_InvenioR and
+                      "K:\\" not in self.directory_data_InvenioR and "L:\\" not in self.directory_data_InvenioR):
+                    self.layout.label_directory2.setText("Incorrect directory given.")
+                else:
+                    self.directory_data_InvenioR = self.directory_data_InvenioR + "/"
+                    self.directory_save_invenioR_processed = self.layout.line_edit_directory.text() + "/Processed_Data"
+                    
+                    if not os.path.exists(self.directory_save_invenioR_processed):
+                        os.makedirs(self.directory_save_invenioR_processed)
+                        self.layout.label_directory2.setText("Dirctory exists.")
+
+                    if os.path.exists(self.directory_save_invenioR_processed):
+                        self.layout.label_directory2.setText("Directory exists.")
+                    self.new_directory_bool = True
+            elif platform.system() == "Darwin":
+                if len(self.directory_data_InvenioR) != 0 and self.directory_data_InvenioR[-1] != '/':
+                    self.directory_data_InvenioR += "/"
+                
+                self.directory_save_invenioR_processed = self.directory_data_InvenioR + "Processed_Data/"
+                    
                 if not os.path.exists(self.directory_save_invenioR_processed):
                     os.makedirs(self.directory_save_invenioR_processed)
                     self.layout.label_directory2.setText("Dirctory exists.")
@@ -654,8 +681,8 @@ class create_tab_ftir_fitting(QWidget):
         if self.sender().text() == "Save fitting parameters":
             try:
                 self.slit_size = float(self.layout.line_edit_slitsize.text())
-                self.offset_left = float(self.layout.line_edit_offset_left.text())
-                self.offset_right = float(self.layout.line_edit_offset_right.text())
+                self.k0 = float(self.layout.line_edit_k0.text())
+                self.k1 = float(self.layout.line_edit_k1.text())
                 self.layout.label_fit_parameters_saved.setText('Fit parameters stored')
             except:
                 self.layout.label_fit_parameters_saved.setText('Uncorrect fit parameters given')
@@ -703,7 +730,12 @@ class create_inner_tab_ftir_fitting(QTabWidget):
         self.signal_plot_fitting_and_residual.connect(self.parent.worker_plotting.fitting_and_residual_plot)
         self.directory = self.parent.tab_ftir_fitting.directory_data_InvenioR
         self.directory_for_saving = self.parent.tab_ftir_fitting.directory_save_invenioR_processed
-        self.files_in_directory_temp = [f for f in os.listdir(self.directory) if op.isfile(op.join(self.directory, f))]
+        self.files_in_directory_temp = []
+        for f in os.listdir(self.directory):
+            if op.isfile(op.join(self.directory, f)):
+                print(f)
+                if not f.startswith('.'):
+                    self.files_in_directory_temp.append(f) 
         self.files_in_directory = []
         for file in self.files_in_directory_temp:
             if file[-2:] == ".0":
@@ -712,12 +744,15 @@ class create_inner_tab_ftir_fitting(QTabWidget):
                 self.files_in_directory.append(file)
             elif file[-4:] == ".dat":
                 self.files_in_directory.append(file)
+            elif file[-4:] == ".tsv":
+                self.files_in_directory.append(file)
         self.array_data = GFL.read_opus_data_from_folder_into_array_for_gui(self.directory)
         self.list_tabs = []
         self.w_dict = {}
         self.t_dict = {}
         self.background = ""
-
+        print(self.files_in_directory)
+        print(self.files_in_directory_temp)
         try:
             for f in range(self.files_in_directory_previous):
                 self.removeTab(0)
@@ -741,8 +776,9 @@ class create_inner_tab_ftir_fitting(QTabWidget):
 
                 s_temp = rd.Spectrum({"wavenumber": data_wavelength, "transmittance": data_transmission}, wunit='cm-1',
                                      units={"transmittance": ""})
-
-                self.w_dict[self.files_in_directory_temp[i]], self.t_dict[self.files_in_directory_temp[i]] = s_temp.get("transmittance")
+                
+                print(self.files_in_directory[i])
+                self.w_dict[self.files_in_directory[i]], self.t_dict[self.files_in_directory[i]] = s_temp.get("transmittance")
 
                 tab_temp = QWidget()
                 tab_temp_layout = QVBoxLayout()
@@ -773,7 +809,7 @@ class create_inner_tab_ftir_fitting(QTabWidget):
 
                 s_exp = rd.Spectrum({"wavenumber": data_wavelength, "transmittance": data_transmission}, wunit='cm-1',
                                  units={"transmittance": ""})
-                self.w_dict[self.files_in_directory_temp[i]], self.t_dict[self.files_in_directory_temp[i]] = s_exp.get(
+                self.w_dict[self.files_in_directory[i]], self.t_dict[self.files_in_directory[i]] = s_exp.get(
                     "transmittance")
 
                 tab_temp = QWidget()
@@ -781,7 +817,7 @@ class create_inner_tab_ftir_fitting(QTabWidget):
                 plot_temp = self.parent.worker_plotting.create_empty_plot(
                     "ftir_fitting_" + str(self.files_in_directory[i]))
                 self.parent.worker_plotting.fitting_and_residual_plot(
-                    ["ftir_fitting_" + str(self.files_in_directory[i]), self.w_dict[self.files_in_directory_temp[i]],
+                    ["ftir_fitting_" + str(self.files_in_directory[i]), self.w_dict[self.files_in_directory[i]],
                      self.t_dict[self.files_in_directory_temp[i]]])
 
                 tab_temp_layout.addWidget(plot_temp)
