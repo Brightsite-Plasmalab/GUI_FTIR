@@ -12,6 +12,7 @@ import Code_Gui.Gui_Library.Gui_Tab_Library as GTB
 import pyqtgraph as pg
 import sys
 
+
 class Window(QWidget):
     def __init__(self, parent=None):
         super().__init__()
@@ -49,7 +50,7 @@ class Window(QWidget):
         self.tabs = QTabWidget()
 
         # Create tab for simulations
-        self.tab_ftir_simulator  = GTB.create_tab_ftir_simulator()
+        self.tab_ftir_simulator = GTB.create_tab_ftir_simulator()
         self.tab_ftir_simulator.create_tab(self)
 
         # Create tab for fitting procedure
@@ -64,8 +65,7 @@ class Window(QWidget):
         self.setLayout(mainLayout)
 
 
-
-if __name__== "__main__":
+if __name__ == "__main__":
     App = QApplication(sys.argv)
     window = Window()
     App.exec()

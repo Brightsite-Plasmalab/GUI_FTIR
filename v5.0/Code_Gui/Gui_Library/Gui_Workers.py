@@ -4,8 +4,6 @@ In this file, one can find the used workers.
 
 import sys
 
-sys.path.append("C:\\Users\\P70085588\\Documents\\General_CCE\\PycharmProjects\\Project_Gui\\Code Gui")
-
 from PySide6.QtGui import QFont
 from PySide6.QtCore import QObject, Signal
 import pyqtgraph as pg
