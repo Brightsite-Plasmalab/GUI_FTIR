@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Stijn"
+  given-names: "Helsloot"
+  orcid: "https://orcid.org/0009-0005-6422-2301"
+title: "FTIR GUI"
+version: 3.0
+date-released: 2024
+url: "https://github.com/StijnHelsl98t/GUI_FTIR/tree/main"
