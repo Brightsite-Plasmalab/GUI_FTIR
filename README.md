@@ -9,7 +9,7 @@ Fully open source Gui made for FTIR simulation/data analysis. Both are done via 
 
 ## MacOS
 - Install Homebrew if you don't have it already.
-- Install c-blosc and HDF5: `brew install c-blosc hdf5`
+- Install c-blosc and HDF5: `brew install c-blosc hdf5 hdfview`
 - Install a virtual environment: `python3 -m venv .venv` (Python 3.14.2 tested on MacOS Sequoia) 
 - Activate the virtual environment: `source .venv/bin/activate`
 - Install the requirements: `pip install -r requirements.txt`
