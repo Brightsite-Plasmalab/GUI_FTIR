@@ -3,9 +3,44 @@ Fully open source Gui made for FTIR simulation/data analysis. Both are done via 
 
 # Installation
 ## Windows
-- Install the requirements: `pip install -r requirements.txt`
-- Install the package: `pip install -e .`
-- Run the GUI: `python -m Code_Gui.FTIR_GUI`
+Download for windows:
+
+Step1: Download Chocolatey
+- Open Windows PowerShell as Administrator
+- Run: Get-ExecutionPolicy
+	- if answer == restricted -> Set-ExecutionPolicy UnRestricted
+- Run: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+- Test by Typing: choco
+
+
+Step 2: Download python 3.9
+- Run: choco install python39
+
+Step 3: Find where python 3.9 has been installed. Often found at C:/Python39
+
+Step 4: Create folder for python environment
+
+Step 5: Download Github Files
+- Download as Zip
+- Extract Zip
+- Place files within new folder into the folder for the python environment
+
+
+Step 6: Go to created folder within terminal
+- Run: cd [path_to_folder]
+
+Step 7: Create environment 
+- Run: [1] -m venv .venv
+	- 1 = path to python 3.9 -> C:\python39\python.exe
+
+Step 8: Activate environment
+- Run: .venv/Scripts/activate 
+
+Step 8:Install necessary requirements. Run:	
+- pip install -r requirement.txt
+
+Step 9: Start the GUI
+- Run: python python -m Code_Gui.FTIR_GUI
 
 ## MacOS
 - Install Homebrew if you don't have it already.
@@ -13,8 +48,8 @@ Fully open source Gui made for FTIR simulation/data analysis. Both are done via 
 - Install a virtual environment: `python3 -m venv .venv` (Python 3.14.2 tested on MacOS Sequoia) 
 - Activate the virtual environment: `source .venv/bin/activate`
 - Install the requirements: `pip install -r requirements.txt`
-- Install the package: `pip install -e .`
 - Run the GUI: `python -m Code_Gui.FTIR_GUI`
+- If no connection with Hitran.org -> Run: pip install pip-system-certs
 
 # Purpose
 This GUI can be used for both for the simulating of theoretical FTIR spectra or for the fitting to experimental FTIR spectra. For both, a tab has been created within the GUI. 
