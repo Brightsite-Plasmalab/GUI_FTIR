@@ -2,19 +2,20 @@
 Fully open source Gui made for FTIR simulation/data analysis. Both are done via using the open-source python module RADIS.
 
 # Installation
+
 ## Windows
 Download for windows:
 
 Step1: Download Chocolatey
 - Open Windows PowerShell as Administrator
-- Run: Get-ExecutionPolicy
+- Run: `Get-ExecutionPolicy`
 	- if answer == restricted -> Set-ExecutionPolicy UnRestricted
-- Run: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-- Test by Typing: choco
+- Run: `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+- Test by Typing: `choco`
 
 
 Step 2: Download python 3.9
-- Run: choco install python39
+- Run: `choco install python39`
 
 Step 3: Find where python 3.9 has been installed. Often found at C:/Python39
 
@@ -27,28 +28,31 @@ Step 5: Download Github Files
 
 
 Step 6: Go to created folder within terminal
-- Run: cd [path_to_folder]
+- Run: `cd [path_to_folder]`
 
 Step 7: Create environment 
-- Run: [1] -m venv .venv
+- Run: `[1] -m venv .venv39`
 	- 1 = path to python 3.9 -> C:\python39\python.exe
 
 Step 8: Activate environment
-- Run: .venv/Scripts/activate 
+- Run: `.venv39/Scripts/activate` 
 
-Step 8:Install necessary requirements. Run:	
-- pip install -r requirement.txt
+Step 8:Install necessary requirements.
+- Run: `pip install -r requirement.txt`
 
 Step 9: Start the GUI
-- Run: python python -m Code_Gui.FTIR_GUI
+- Run: `python python -m Code_Gui.FTIR_GUI`
 
 ## MacOS
 - Install Homebrew if you don't have it already.
-- Install Python 3.14: `brew install python@3.14`
-- Install c-blosc and HDF5: `brew install c-blosc hdf5 hdfview`
-- Install a virtual environment using Python 3.14: `/opt/homebrew/bin/python3.14 -m venv .venv` (Python 3.14.2 tested on MacOS Sequoia) 
+- Install python 3.9.13: `brew install python@3.9.13`
+- Install c-blosc and HDF5: `brew install c-blosc hdf5`
+- Go to correct folder for python environment. Run: `cd [path_to_folder]`
+- Find where python 3.9 has been installed.
+- Install a virtual environment: `[1] -m venv .venv39`
+	- 1 =  path to python 3.9
 - Activate the virtual environment: `source .venv/bin/activate`
-- Install the requirements: `pip install -r requirements.txt`
+- Install the requirements: `pip install -r requirement.txt`
 - Run the GUI: `python -m Code_Gui.FTIR_GUI`
 - If no connection with Hitran.org -> Run: pip install pip-system-certs
 
