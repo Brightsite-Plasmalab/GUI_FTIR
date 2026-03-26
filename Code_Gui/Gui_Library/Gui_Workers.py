@@ -255,8 +255,8 @@ class WorkerFTIRFitter(QObject):
         index = self.inner_tab.currentIndex()
         current_file = files_in_directory[index]
         print(self.tab.directory_save_InvenioR_processed)
-        data_text_file_selected = self.tab.directory_save_InvenioR_processed + "/Data (in text files)" + "/" + \
-                                  current_file + ".txt"
+        data_text_file_selected = os.path.join(self.tab.directory_save_InvenioR_processed, "Data (in text files)", \
+                                  current_file + ".txt")
         data = self.inner_tab.array_data[index]
         list_molecules = self.tab.molecule_storage_for_fitting
         dict_molecules = {}
@@ -318,8 +318,8 @@ class WorkerFTIRFitter(QObject):
 
 
             if bool_molecules and bool_temperature and bool_pressure:
-                if not op.exists(self.tab.directory_save_InvenioR_processed + "/" + "Measurement_file.h5"):
-                    hf = h5py.File(self.tab.directory_save_InvenioR_processed + "/" + "Measurement_file.h5",
+                if not op.exists(os.path.join(self.tab.directory_save_InvenioR_processed, "Measurement_file.h5")):
+                    hf = h5py.File(os.path.join(self.tab.directory_save_InvenioR_processed, "Measurement_file.h5"),
                                    "w")
                 self.tab.layout.label_info_fit.setText("Fitting for "
                                                        + current_file
@@ -348,7 +348,7 @@ class WorkerFTIRFitter(QObject):
                     except:
                         list_time.append(0)
 
-                with h5py.File(self.tab.directory_save_InvenioR_processed + "/" + "Measurement_file.h5", "r+") as hf:
+                with h5py.File(os.path.join(self.tab.directory_save_InvenioR_processed, "Measurement_file.h5"), "r+") as hf:
                     keys = list(hf.keys())
 
                     if "File Names" not in keys:
@@ -601,8 +601,8 @@ class WorkerFTIRFitter(QObject):
 
                     self.signal_fitting_plot.emit(
                         ["ftir_fitting_" + current_file, w_exp, t_exp, refit, residual])
-                    with (h5py.File(
-                            self.parent.tab_ftir_fitting.directory_save_InvenioR_processed + "/" + "Measurement_file.h5",
+                    with (h5py.File(os.path.join(
+                            self.parent.tab_ftir_fitting.directory_save_InvenioR_processed, "Measurement_file.h5"),
                             "r+") as hf):
                         if hf["Temperature"][index] != temperature:
                             hf["Temperature"][index] = temperature
@@ -735,8 +735,8 @@ class WorkerFTIRFitter(QObject):
         for index in range(len_files_in_dir):
             current_file = files_in_directory[index]
             if self.inner_tab.background != current_file:
-                data_text_file_selected = self.tab.directory_save_InvenioR_processed + \
-                                          "/Data (in text files)" + "/" + current_file + ".txt"
+                data_text_file_selected = os.path.join(self.tab.directory_save_InvenioR_processed, \
+                                          "Data (in text files)", current_file + ".txt")
                 data = self.inner_tab.array_data[index]
 
                 pressure = list_pressure[index]
@@ -769,11 +769,11 @@ class WorkerFTIRFitter(QObject):
                         self.tab.layout.label_info_fit.setText("Fitting for "
                                                                + current_file
                                                                + " ....")
-                        if not op.exists(self.tab.directory_save_InvenioR_processed + "/" + "Measurement_file.h5"):
-                            hf = h5py.File(self.tab.directory_save_InvenioR_processed + "/" + "Measurement_file.h5",
+                        if not op.exists(os.path.join(self.tab.directory_save_InvenioR_processed, "Measurement_file.h5")):
+                            hf = h5py.File(os.path.join(self.tab.directory_save_InvenioR_processed, "Measurement_file.h5"),
                                            "w")
 
-                        with h5py.File(self.tab.directory_save_InvenioR_processed + "/" + "Measurement_file.h5",
+                        with h5py.File(os.path.join(self.tab.directory_save_InvenioR_processed, "Measurement_file.h5"),
                                        "r+") as hf:
                             keys = list(hf.keys())
                             if "File Names" not in keys:
@@ -988,7 +988,7 @@ class WorkerFTIRFitter(QObject):
 
                         self.signal_fitting_plot.emit(
                             ["ftir_fitting_" + current_file, w_exp, t_exp, refit, residual])
-                        with h5py.File(self.tab.directory_save_InvenioR_processed + "/" + "Measurement_file.h5",
+                        with h5py.File(os.path.join(self.tab.directory_save_InvenioR_processed, "Measurement_file.h5"),
                                        "r+") as hf:
                             if hf["Temperature"][index] != temperature:
                                 hf["Temperature"][index] = temperature
@@ -1190,16 +1190,16 @@ class WorkerSaver(QObject):
 
         if data[3] == "Fitted FTIR Data":
             folder = "Data (in text files)"
-            if not os.path.exists(self.directory + "/" + folder):
-                os.makedirs(self.directory + "/" + folder)
+            if not os.path.exists(os.path.join(self.directory, folder)):
+                os.makedirs(os.path.join(self.directory, folder))
             self.data = data[2]
-            np.savetxt(self.directory + "/" + folder + "/" + self.name + ".txt", self.data, delimiter='\t',
+            np.savetxt(os.path.join(self.directory, folder, self.name + ".txt"), self.data, delimiter='\t',
                        header="Wavelength \t\t\tExperimental Transmission \t   Fitted Transmission \t\t      "
                               "Residual")
             print(self.directory)
         elif data[3] == "Simulated Data":
             self.data = data[2]
-            np.savetxt(self.directory + self.name + ".txt", self.data, delimiter='\t',
+            np.savetxt(os.path.join(self.directory, self.name + ".txt"), self.data, delimiter='\t',
                        header="Wavelength \t\t\tSimulated data")
 
     def save_data_as_png(self, data):
@@ -1210,8 +1210,9 @@ class WorkerSaver(QObject):
 
         if data[3] == "Fitted FTIR Data":
             folder = "Data (in png's)"
-            if not os.path.exists(self.directory + "/" + folder):
-                os.makedirs(self.directory + "/" + folder)
+            if not os.path.exists(os.path.join(self.directory, folder)):
+                os.makedirs(os.path.join(self.directory, folder))
+                print(os.path.join(self.directory, folder))
 
             if not self.parent.tab_ftir_fitting.absorbance_bool:
                 self.state = "Transmission"
@@ -1279,7 +1280,7 @@ class WorkerSaver(QObject):
             axes1.tick_params(axis='both', which='minor', labelsize=12)
             axes2.tick_params(axis='both', which='major', labelsize=14)
             axes2.tick_params(axis='both', which='minor', labelsize=12)
-            figure.savefig(self.directory + "/" + folder + "/" + self.name + "_" + self.state + ".png", dpi=100)
+            figure.savefig(os.path.join(self.directory, folder, self.name + "_" + self.state + ".png"), dpi=100)
 
         elif data[3] == "Simulated Data":
             if not self.parent.tab_ftir_simulator.absorbance_bool:
@@ -1320,7 +1321,7 @@ class WorkerSaver(QObject):
             plot = axes.plot(x, y, label="simulated data", linewidth=1, color="red")
             axes.tick_params(axis='both', which='major', labelsize=14)
             axes.tick_params(axis='both', which='minor', labelsize=12)
-            figure.savefig(self.directory + self.name + ".png", dpi=100)
+            figure.savefig(os.path.join(self.directory, self.name + ".png"), dpi=100)
 
 class WorkerHitran(QObject):
     def __init__(self, parent):
@@ -1336,9 +1337,7 @@ class WorkerHitran(QObject):
             
             self.parent.tab_get_database.layout.label_info_to_get.setStyleSheet("font-weight: bold ; font-size:12pt; background-color: white")
             
-            
             fetch_hitran(molecule, cache="regen", extra_params="all")
-
                     
             gotten_string += molecule + ", " 
             self.parent.tab_get_database.layout.label_info_gotten.setText("Got Data for molecules: " + gotten_string)
