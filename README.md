@@ -42,32 +42,19 @@ Step 8:Install necessary requirements.
 
 Step 9: Start the GUI
 - Run: `python python -m Code_Gui.FTIR_GUI`
-
-## MacOS
-- Install Homebrew if you don't have it already.
-- Install python 3.9.13: `brew install python@3.9.13`
-- Install c-blosc and HDF5: `brew install c-blosc hdf5`
-- Go to correct folder for python environment. Run: `cd [path_to_folder]`
-- Find where python 3.9 has been installed.
-- Install a virtual environment: `[1] -m venv .venv39`
-	- 1 =  path to python 3.9
-- Activate the virtual environment: `source .venv/bin/activate`
-- Install the requirements: `pip install -r requirement.txt`
-- Run the GUI: `python -m Code_Gui.FTIR_GUI`
-- If no connection with Hitran.org -> Run: pip install pip-system-certs
  
-## MacOS (Second try)
+## MacOS
 - Install Homebrew if you don't have it already (instructions on https://brew.sh)
 - Open a Terminal
 - Install python 3.10: `brew install python@3.10`
 - Install c-blosc and HDF5: `brew install c-blosc hdf5`
 - Download this github repository to a convenient location
-- Go to the folder where the repository is installed and create a python virtual environment with the installed python:
+- Go to the folder where the repository is downloaded and create a python virtual environment with the installed python:
 	- `/opt/homebrew/bin/python3.10 -m venv .GUI_FTIR_v3p10`
  - Activate the created environment (only possible from the folder where you created the virtual environment):
  	- `source .GUI_FTIR_v3p10/bin/activate`
   	- The terminal should now have `(.GUI_FTIR_v3p10)` in front to indicate that you are in the environment.
-- Go to the folder where the the GUI is copied
+- Go into the folder where the GUI is downloaded
 - Install the required packages with `pip install -r minreq.txt` 
 - Run the GUI with the following command:
 	- `python -m Code_Gui.FTIR_GUI`
