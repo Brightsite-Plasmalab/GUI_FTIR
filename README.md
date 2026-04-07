@@ -55,6 +55,24 @@ Step 9: Start the GUI
 - Install the requirements: `pip install -r requirement.txt`
 - Run the GUI: `python -m Code_Gui.FTIR_GUI`
 - If no connection with Hitran.org -> Run: pip install pip-system-certs
+ 
+## MacOS (Second try)
+- Install Homebrew if you don't have it already (instructions on https://brew.sh)
+- Open a Terminal
+- Install python 3.10: `brew install python@3.10`
+- Install c-blosc and HDF5: `brew install c-blosc hdf5`
+- Download this github repository to a convenient location
+- Go to the folder where the repository is installed and create a python virtual environment with the installed python:
+	- `/opt/homebrew/bin/python3.10 -m venv .GUI_FTIR_v3p10`
+ - Activate the created environment (only possible from the folder where you created the virtual environment):
+ 	- `source .GUI_FTIR_v3p10/bin/activate`
+  	- The terminal should now have `(.GUI_FTIR_v3p10)` in front to indicate that you are in the environment.
+- Go to the folder where the the GUI is copied
+- Install the required packages with `pip install -r minreq.txt` 
+- Run the GUI with the following command:
+	- `python -m Code_Gui.FTIR_GUI`
+- If no connection with Hitran.org -> Run: pip install pip-system-certs
+- You can deactivate the environment by typing `deactivate`
 
 # Purpose
 This GUI can be used for both for the simulating of theoretical FTIR spectra or for the fitting to experimental FTIR spectra. For both, a tab has been created within the GUI. 
