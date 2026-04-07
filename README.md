@@ -117,3 +117,7 @@ There are three possible options for someone to use this GUI:
 - The first option includes e-mailing the creator and asking if you can get an installer and use this to install the gui, to which he will happily comply. This email is the following: stijn.helsloot@maastrichtuniversity.nl.
 - The second option would be to actually create this installer/gui.exe themselves, using the "setup,py"-file and python. To do this, one would need to install all the files within the folder and copy-paste the files inside into a single python environment. Once this is done, one can run the "setup,py"-file to get the wanted installer. The creation of this installer might take a couple of hours, so please keep this in mind. Also important to keep in mind, this will need one needs to download all the necessary modules.
 -  The last option would be to us python to directly create the GUI. For this, one needs to install al the files within the folder and copy-paste the files inside into a single python environment. Once this is done, once can run the "FTIR-GUI.py"-file. After a few second, this will open the GUI. Important to note: everytime one wants to open this GUI now, one will need to do this via python. No stand-alone GUI is now created. Also, again, one needs to make sure the necessary modules are downloaded.
+
+# Licence
+
+CC-BY-SA-4.0
