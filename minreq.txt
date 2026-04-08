@@ -1,0 +1,7 @@
+setuptools
+radis
+pypi
+PySide6
+brukeropusreader
+pyqtgraph
+pip-system-certs

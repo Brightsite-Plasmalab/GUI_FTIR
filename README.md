@@ -2,19 +2,20 @@
 Fully open source Gui made for FTIR simulation/data analysis. Both are done via using the open-source python module RADIS.
 
 # Installation
+
 ## Windows
 Download for windows:
 
 Step1: Download Chocolatey
 - Open Windows PowerShell as Administrator
-- Run: Get-ExecutionPolicy
+- Run: `Get-ExecutionPolicy`
 	- if answer == restricted -> Set-ExecutionPolicy UnRestricted
-- Run: Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-- Test by Typing: choco
+- Run: `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
+- Test by Typing: `choco`
 
 
 Step 2: Download python 3.9
-- Run: choco install python39
+- Run: `choco install python39`
 
 Step 3: Find where python 3.9 has been installed. Often found at C:/Python39
 
@@ -27,30 +28,38 @@ Step 5: Download Github Files
 
 
 Step 6: Go to created folder within terminal
-- Run: cd [path_to_folder]
+- Run: `cd [path_to_folder]`
 
 Step 7: Create environment 
-- Run: [1] -m venv .venv
+- Run: `[1] -m venv .venv39`
 	- 1 = path to python 3.9 -> C:\python39\python.exe
 
 Step 8: Activate environment
-- Run: .venv/Scripts/activate 
+- Run: `.venv39/Scripts/activate` 
 
-Step 8:Install necessary requirements. Run:	
-- pip install -r requirement.txt
+Step 8:Install necessary requirements.
+- Run: `pip install -r requirement.txt`
 
 Step 9: Start the GUI
-- Run: python python -m Code_Gui.FTIR_GUI
-
+- Run: `python python -m Code_Gui.FTIR_GUI`
+ 
 ## MacOS
-- Install Homebrew if you don't have it already.
-- Install Python 3.14: `brew install python@3.14`
-- Install c-blosc and HDF5: `brew install c-blosc hdf5 hdfview`
-- Install a virtual environment using Python 3.14: `/opt/homebrew/bin/python3.14 -m venv .venv` (Python 3.14.2 tested on MacOS Sequoia) 
-- Activate the virtual environment: `source .venv/bin/activate`
-- Install the requirements: `pip install -r requirements.txt`
-- Run the GUI: `python -m Code_Gui.FTIR_GUI`
+- Install Homebrew if you don't have it already (instructions on https://brew.sh)
+- Open a Terminal
+- Install python 3.10: `brew install python@3.10`
+- Install c-blosc and HDF5: `brew install c-blosc hdf5`
+- Download this github repository to a convenient location
+- Go to the folder where the repository is downloaded and create a python virtual environment with the installed python:
+	- `/opt/homebrew/bin/python3.10 -m venv .GUI_FTIR_v3p10`
+ - Activate the created environment (only possible from the folder where you created the virtual environment):
+ 	- `source .GUI_FTIR_v3p10/bin/activate`
+  	- The terminal should now have `(.GUI_FTIR_v3p10)` in front to indicate that you are in the environment.
+- Go into the folder where the GUI is downloaded
+- Install the required packages with `pip install -r minreq.txt` 
+- Run the GUI with the following command:
+	- `python -m Code_Gui.FTIR_GUI`
 - If no connection with Hitran.org -> Run: pip install pip-system-certs
+- You can deactivate the environment by typing `deactivate`
 
 # Purpose
 This GUI can be used for both for the simulating of theoretical FTIR spectra or for the fitting to experimental FTIR spectra. For both, a tab has been created within the GUI. 
@@ -95,3 +104,7 @@ There are three possible options for someone to use this GUI:
 - The first option includes e-mailing the creator and asking if you can get an installer and use this to install the gui, to which he will happily comply. This email is the following: stijn.helsloot@maastrichtuniversity.nl.
 - The second option would be to actually create this installer/gui.exe themselves, using the "setup,py"-file and python. To do this, one would need to install all the files within the folder and copy-paste the files inside into a single python environment. Once this is done, one can run the "setup,py"-file to get the wanted installer. The creation of this installer might take a couple of hours, so please keep this in mind. Also important to keep in mind, this will need one needs to download all the necessary modules.
 -  The last option would be to us python to directly create the GUI. For this, one needs to install al the files within the folder and copy-paste the files inside into a single python environment. Once this is done, once can run the "FTIR-GUI.py"-file. After a few second, this will open the GUI. Important to note: everytime one wants to open this GUI now, one will need to do this via python. No stand-alone GUI is now created. Also, again, one needs to make sure the necessary modules are downloaded.
+
+# Licence
+
+CC-BY-SA-4.0
