@@ -21,6 +21,9 @@ import matplotlib.pyplot as plt
 from radis.io.hitran import fetch_hitran
 
 
+AUTO_Y_RANGE = False
+
+
 class WorkerPlotter(QObject):
     """
     Worker used for plotting.
@@ -80,7 +83,7 @@ class WorkerPlotter(QObject):
             self.dict_plots[name].p1.y = GFL.tr_to_ab(data[2])
         else:
             self.dict_plots[name].p1.y = data[2]
-        self.dict_plots[name].p1.enableAutoRange('y', enable=True)
+        self.dict_plots[name].p1.enableAutoRange('y', enable=AUTO_Y_RANGE)
         self.dict_plots[name].p1.dataline = \
             self.dict_plots[name].p1.plot(self.dict_plots[name].p1.x, self.dict_plots[name].p1.y,
                                           pen=self.dict_plots[name].p1.pen)
@@ -110,7 +113,7 @@ class WorkerPlotter(QObject):
                 self.dict_plots[name].p1.y = data[2]
 
         self.dict_plots[name].p1.dataline.setData(self.dict_plots[name].p1.x, self.dict_plots[name].p1.y)
-        self.dict_plots[name].p1.enableAutoRange('y', enable=True)
+        self.dict_plots[name].p1.enableAutoRange('y', enable=AUTO_Y_RANGE)
 
     @Slot()
     def update_fitting_and_residual_plot(self, data):
@@ -157,8 +160,8 @@ class WorkerPlotter(QObject):
         self.dict_plots[name].p1.dataline_exp.setData(self.dict_plots[name].p1.x_fit, self.dict_plots[name].p1.y_exp)
         self.dict_plots[name].p1.dataline_fit.setData(self.dict_plots[name].p1.x_fit, self.dict_plots[name].p1.y_fit)
         self.dict_plots[name].p2.dataline_res.setData(self.dict_plots[name].p1.x_fit, self.dict_plots[name].p2.y_res)
-        self.dict_plots[name].p1.enableAutoRange('y', enable=True)
-        self.dict_plots[name].p2.enableAutoRange('y', enable=True)
+        self.dict_plots[name].p1.enableAutoRange('y', enable=AUTO_Y_RANGE)
+        self.dict_plots[name].p2.enableAutoRange('y', enable=AUTO_Y_RANGE)
 
     @Slot()
     def fitting_and_residual_plot(self, data):
@@ -180,6 +183,7 @@ class WorkerPlotter(QObject):
         self.dict_plots[name].p1 = self.dict_plots[name].addPlot(0, 0)
         self.dict_plots[name].p2 = self.dict_plots[name].addPlot(1, 0)
         self.dict_plots[name].p1.setXLink(self.dict_plots[name].p2)
+        self.dict_plots[name].p1.getAxis('left').setRange(0, 1.05)
 
         # Set needed parameters for plot 1
         self.dict_plots[name].p1.getViewBox().setMouseMode(pg.ViewBox.RectMode)
@@ -187,7 +191,7 @@ class WorkerPlotter(QObject):
         self.dict_plots[name].p1.titleLabel.item.setFont(self.font_title)
         self.dict_plots[name].p1.setLabel('left', "Intensity / (A.U.)")
         self.dict_plots[name].p1.getAxis('left').label.setFont(self.font_label)
-        self.dict_plots[name].p1.enableAutoRange('y', enable=True)
+        self.dict_plots[name].p1.enableAutoRange('y', enable=AUTO_Y_RANGE)
         self.dict_plots[name].p1.legend = self.dict_plots[name].p1.addLegend()
         self.dict_plots[name].p1.legend.mouseDragEvent = lambda *args, **kwargs: None
         self.dict_plots[name].p1.legend.anchor((1, 0), (1, 0))
@@ -200,7 +204,7 @@ class WorkerPlotter(QObject):
         self.dict_plots[name].p2.setLabel('bottom', " Wavenumber / (cm^-1)")
         self.dict_plots[name].p2.getAxis('bottom').label.setFont(self.font_label)
         self.dict_plots[name].p2.getViewBox().setMouseMode(pg.ViewBox.RectMode)
-        self.dict_plots[name].p2.enableAutoRange('y', enable=True)
+        self.dict_plots[name].p2.enableAutoRange('y', enable=AUTO_Y_RANGE)
         self.dict_plots[name].p2.legend = self.dict_plots[name].p2.addLegend()
         self.dict_plots[name].p2.legend.mouseDragEvent = lambda *args, **kwargs: None
         self.dict_plots[name].p2.legend.anchor((1, 0), (1, 0))
