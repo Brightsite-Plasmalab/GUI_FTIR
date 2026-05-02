@@ -199,7 +199,8 @@ def main():
         for key in meta: #Copy input parameters for trackability
             tempdict[key] = meta[key]
         for par in out.params: #Overwrite parameters with fit results
-            tempdict[par] = out.params[par].value     
+            tempdict[par] = out.params[par].value    
+        tempdict["molfinit"] = ','.join(['{0:07.5f}'.format(tempdict["c_" + mol]) for mol in fmol]) #Write fit parameters as initial values so that the output file can be directly used as input for an eventual refinement of the fit. 
 
         mind = ['nfev', 'covar', 'nvarys', 'ndata', 'nfree', 'aborted', 'success', 'errorbars', 'ier', 'message', 'method', 'chisqr', 'redchi', 'aic', 'bic', 'params', 'var_names', 'init_vals', 'init_values', 'call_kws']
         for a in dir(out):
