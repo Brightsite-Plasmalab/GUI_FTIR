@@ -1,0 +1,3 @@
+c_CH4,c_CO2,calcres,filename,fixpars,k0,k1,molecules,molfinit,pathlength,plotpars,pressure,slitsize,temperature,wmax,wmin
+0.0,1.0624037627491045,0.01,/Users/ndh/Surfdrive/Projects/2025-11-25_FTIR-Analysis/012_Benjamin-Setup5-Calibration-Data/parameter_testing_n2_res0-25_triangular.tsv,"pathlength, temperature, pressure, k1, slitsize, calcres",-0.3716886014725187,1.0,CO2,0.9,16.062,,0.05,0.35,300.0,2400,2200
+0.9751654530321741,0.10195084145794421,0.01,/users/ndh/Surfdrive/Projects/2025-11-25_FTIR-Analysis/010_Vivek-Dataset/2026-04-10_No-Plasma-CH4/3-11-2026 11-00 AM (GMT01-00).tsv,"pathlength, temperature, pressure, k1, slitsize, calcres",-0.6708123958237326,1.0,"CH4,CO2","0.9, 0.1",16.062,,0.066,0.8,340.0,3500.0,2000.0

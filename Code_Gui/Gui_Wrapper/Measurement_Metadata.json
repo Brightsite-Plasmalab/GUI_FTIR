@@ -1,0 +1,38 @@
+{
+    "fit_list": [
+    {
+      "filename": "/Users/ndh/Surfdrive/Projects/2025-11-25_FTIR-Analysis/012_Benjamin-Setup5-Calibration-Data/parameter_testing_n2_res0-25_triangular.tsv",
+      "pathlength":"16.062",
+      "temperature":"300.0",
+      "pressure":"0.050",
+      "k0":"0.0",
+      "k1":"1.0",
+      "slitsize":"0.35",
+      "wmin":"2200",
+      "wmax":"2400",
+      "molecules":"CO2",
+      "molfinit":"0.9",
+      "calcres":"0.01",
+      "fixpars":"pathlength, temperature, pressure, k1, slitsize, calcres",
+      "plotpars":""
+    },
+    {
+      "filename": "/users/ndh/Surfdrive/Projects/2025-11-25_FTIR-Analysis/010_Vivek-Dataset/2026-04-10_No-Plasma-CH4/3-11-2026 11-00 AM (GMT01-00).tsv",
+      "pathlength":"16.062",
+      "temperature":"340.0",
+      "pressure":"0.066",
+      "k0":"-0.85019066",
+      "k1":"1.0",
+      "slitsize":"0.8",
+      "wmin":"2000.0",
+      "wmax":"3500.0",
+      "molecules":"CH4,CO2",
+      "molfinit":"0.9, 0.1" , 
+      "calcres":"0.01",
+      "fixpars":"pathlength, temperature, pressure, k1, slitsize, calcres",
+      "plotpars":""
+    }    
+    ]
+
+
+}
