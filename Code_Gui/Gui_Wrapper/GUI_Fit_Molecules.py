@@ -9,6 +9,7 @@ from brukeropusreader import read_file
 
 from lmfit import minimize, Parameters, fit_report
 from radis import Spectrum, MergeSlabs
+from scipy.signal import savgol_filter
 
 import io                 as io #output management (suppress uneven sampling and mole fraction warnings and radis output)
 import contextlib         as contextlib
@@ -20,6 +21,8 @@ from pprint import pprint
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( __file__ ))))
 import Code_Gui.Gui_General_Code.General_Functions_Library as GFL
 import Code_Gui.Gui_General_Code.Gas_Mixtures_Spectra_Library as GMSL
+
+import spectrochempy as spectrochempy
 
 def read_FTIR_measurement(fnam): 
     """
@@ -36,6 +39,21 @@ def read_FTIR_measurement(fnam):
     elif fext == "dat":
         sys.exit()
     elif fext == "spa":
+        xdat = spectrochempy.read_spa(fnam)
+        print(xdat)
+        pprint(dir(xdat.x))
+        print(xdat.x.data)
+        print(xdat.x._data)
+        print(xdat.x.has_data)
+        print(xdat.x.title)
+
+        # sys.exit()
+        print(dir(xdat.y))
+        print(xdat.y.data)
+        print(xdat.y.has_data)
+        print(xdat.y.title)
+        # print(ydat)
+        # print(np.vstack((xdat, ydat)).shape)
         sys.exit()        
     else:
         print("File extension " + fext + " not implemented, exiting")
@@ -117,11 +135,26 @@ def main():
     savedata.append(savelabs)
 
     for meta in metadata["fit_list"]:
-
+        
         pprint(meta)
+
+        if 'plotname' in meta.keys():
+            pnam = '_' + meta["plotname"]
+        else:
+            pnam = ''
 
         measdata = read_FTIR_measurement(meta["filename"])
         fitrange = (measdata[:,0] > float(meta["wmin"]))*(measdata[:,0] < float(meta["wmax"]))
+
+        if 'corrbase' in meta.keys() and meta["corrbase"].lower() not in ['0', 'no', 'false']: #Baseline correction requested.
+            basetest = (measdata[:,0] > float(meta["wmin"]))*(measdata[:,0] < float(meta["wmax"]))
+            specderi = savgol_filter(measdata[:,1], window_length=12, polyorder=6, deriv=1, delta=(measdata[1,0] - measdata[0,0]), cval=1.0)
+            basetest *= (np.abs(specderi) < 0.1) #Parts with a large derivative are not part of the baseline. 
+            temptest  = np.abs(measdata[:,1] - np.median(measdata[basetest,1])) < 1.0*np.std(measdata[basetest,1]) 
+            pfit = np.polyfit(measdata[basetest*temptest,0], measdata[basetest*temptest,1], deg=1) #Fit upper band for initial guess. 
+            basetest *= np.abs(measdata[:,1] - (pfit[0]*measdata[:,0] + pfit[1])) < 0.5*np.std(measdata[basetest,1]) 
+            pfit = np.polyfit(measdata[basetest*temptest,0], measdata[basetest*temptest,1], deg=1) #Then fit closer band to fitter baseline. 
+            # print(pfit)
 
         if 'plotpars'in meta.keys():
             ppar = meta["plotpars"].replace(' ', '').split(',')
@@ -137,10 +170,18 @@ def main():
             plt.ylabel('Transmittance', fontsize=20)
             plt.plot(measdata[lrang,0], measdata[lrang,1], linestyle='-', marker='none', color='gray')                
             plt.plot(measdata[urang,0], measdata[urang,1], linestyle='-', marker='none', color='gray')                            
-            plt.plot(measdata[fitrange,0], measdata[fitrange,1], linestyle='-', marker='none', color='blue')        
+            plt.plot(measdata[fitrange,0], measdata[fitrange,1], linestyle='-', marker='none', color='blue')   
+            if 'corrbase' in meta.keys() and meta["corrbase"].lower() not in ['0', 'no', 'false']: 
+                plt.plot(measdata[:,0], pfit[0]*measdata[:,0] + pfit[1], linestyle='-', marker='none', color='red')        
+                plt.plot(measdata[basetest,0], measdata[basetest,1], linestyle='none', marker='o', markersize=1, markeredgecolor='orange', color='orange')        
             plt.xlim(4000.0, 1000.0)
-            plt.ylim(0.0, 1.05)     
+            plt.ylim(0.0, 1.05)    
+            plt.savefig(meta["filename"].split('.')[0] + '_Meas' + pnam + '.png', transparent='False')
+            plt.savefig(meta["filename"].split('.')[0] + '_Meas' + pnam + '.pdf', transparent='False')                
             plt.show()
+
+        if 'corrbase' in meta.keys() and meta["corrbase"].lower() not in ['0', 'no', 'false']: #Baseline correction requested. -> cut off 50 % as signal. 
+            measdata[:,1] -= (pfit[0]*measdata[:,0] + pfit[1]) - 1.0 #Tranmittance should be 1 on baseline!            
 
         fmol = meta["molecules"].replace(' ', '').split(',')
         molf = meta["molfinit"].replace(' ', '').split(',')
@@ -169,10 +210,9 @@ def main():
         
         tic()
         out = minimize(spectra_molecules_c, fpar, args=(measdata[fitrange,0], measdata[fitrange,1], specdict), method='leastq')#, max_nfev=1000)
+        ffit = spectra_molecules_c(out.params, measdata[fitrange,0], measdata[fitrange,1], specdict, test=True)
         print("Total fitting time: {0:07.3f}s".format(toc()))
         print(fit_report(out))
-
-        ffit = spectra_molecules_c(out.params, measdata[fitrange,0], measdata[fitrange,1], specdict, test=True)
 
         if 'fit' in ppar:      
             fig, ax = plt.subplots(2, sharex=True, height_ratios=np.array([3.0, 1.0])) 
@@ -191,8 +231,8 @@ def main():
             ax[1].set_xlim(float(meta["wmax"]), float(meta["wmin"]))
             ax[0].set_ylim(0.0, 1.05)    
             ax[1].set_ylim(-10.0, +10.0)                
-            plt.savefig(meta["filename"].split('.')[0] + '_Fit.png', transparent='False')
-            plt.savefig(meta["filename"].split('.')[0] + '_Fit.pdf', transparent='False')        
+            plt.savefig(meta["filename"].split('.')[0] + '_Fit' + pnam + '.png', transparent='False')
+            plt.savefig(meta["filename"].split('.')[0] + '_Fit' + pnam + '.pdf', transparent='False')        
             plt.show()  
 
         tempdict = {}
@@ -200,7 +240,8 @@ def main():
             tempdict[key] = meta[key]
         for par in out.params: #Overwrite parameters with fit results
             tempdict[par] = out.params[par].value    
-        tempdict["molfinit"] = ','.join(['{0:07.5f}'.format(tempdict["c_" + mol]) for mol in fmol]) #Write fit parameters as initial values so that the output file can be directly used as input for an eventual refinement of the fit. 
+        # tempdict["molfinit"] = ','.join(['{0:07.5f}'.format(tempdict["c_" + mol]) for mol in fmol]) #Write fit parameters as initial values so that the output file can be directly used as input for an eventual refinement of the fit. 
+        tempdict["basefit"] = ','.join(['{0:07.5f}'.format(val) for val in pfit])
 
         mind = ['nfev', 'covar', 'nvarys', 'ndata', 'nfree', 'aborted', 'success', 'errorbars', 'ier', 'message', 'method', 'chisqr', 'redchi', 'aic', 'bic', 'params', 'var_names', 'init_vals', 'init_values', 'call_kws']
         for a in dir(out):
@@ -216,7 +257,7 @@ def main():
                 
         pprint(tempdict)
 
-        with open(meta["filename"].split('.')[0] + '_Fit.json', 'w') as fp:
+        with open(meta["filename"].split('.')[0] + '_Fit' + pnam + '.json', 'w') as fp:
             json.dump(tempdict, fp, indent=4)
 
         templist = []
