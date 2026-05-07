@@ -105,6 +105,38 @@ There are three possible options for someone to use this GUI:
 - The second option would be to actually create this installer/gui.exe themselves, using the "setup,py"-file and python. To do this, one would need to install all the files within the folder and copy-paste the files inside into a single python environment. Once this is done, one can run the "setup,py"-file to get the wanted installer. The creation of this installer might take a couple of hours, so please keep this in mind. Also important to keep in mind, this will need one needs to download all the necessary modules.
 -  The last option would be to us python to directly create the GUI. For this, one needs to install al the files within the folder and copy-paste the files inside into a single python environment. Once this is done, once can run the "FTIR-GUI.py"-file. After a few second, this will open the GUI. Important to note: everytime one wants to open this GUI now, one will need to do this via python. No stand-alone GUI is now created. Also, again, one needs to make sure the necessary modules are downloaded.
 
+# Command-line fitting
+
+It is possible to fit an FTIR spectrum by specifying the requested parameters in a JSON job file, and executing: 
+
+`python ./Code_Gui/Gui_Wrapper/GUI_Fit_Molecules.py FTIR_Fitpars.json`. 
+
+`./Code_Gui/Gui_Wrapper/GUI_Fit_Molecules.py` can be replaced by whatever the path of `GUI_Fit_Molecules.py` is, and `FTIR_Fitpars.json` can be replaced by whatever the path and name of the JSON input file is. This method allows e.g. to fix certain fit parameters manually, to check aspects of the fit results. An example input `FTIR_Fitpars.json` is included in the folder `Code_Gui/Gui_Wrapper/`. 
+
+The input file contains the following required parameters:
+- **filename:** filename (including path) of the input spectrum
+- **pathlength:** pathlength of FTIR gas cell in cm.
+- **temperature:** of measured sample in K.
+- **pressure:** in gas cell in bar.
+- **k0:** spectral offset in wavenumber (cm<sup>-1</sup>).
+- **k1:** spectral linear stretch (should be very close to 1 in practice).
+- **slitsize:** size of Gaussian instrument function in wavenumber (cm<sup>-1</sup>).
+- **wmin:** lower limit to be fitted in wavenumber (cm<sup>-1</sup>).
+- **wmax:** upper limit to be fitted in wavenumber (cm<sup>-1</sup>).
+- **molecules:** to be included as string, e.g.: `"CO2,CH4,C2H2,C2H4,C2H6"`.
+- **molfinit:** initial mole fraction of molecules included in the fit, e.g. `"0.1,0.1,0.1,0.1,0.1"`.
+- **calcres:** resolution on which to calculate the fit function in wavenumber (cm<sup>-1</sup>).
+  
+The input file contains the following optional parameters:
+- **fixpars:**: list with names of input parameters to be fixed during the fit, e.g. `"pathlength, temperature, slitsize, k1, pressure, calcres, c_CO2"`.
+- **plotpars:** requested plots. Choose from either/or/neither: `"measurement,fit"`.
+- **plotname:** additional string to be appended to saved files to distinguish different fits of the same input spectrum.
+- **corrbase:** request baseline correction with e.g. `"yes"`.
+- **tranlimit:** exclude points with a transmission below this value from the fit, e.g. due to saturation issues. 
+
+The fit will give command-line output to inform the user of the timing and output of the fit. Additionally, a JSON output file is written for each fit, in the same folder as the input data. An overview CSV file is created with next to the input JSON file with a summary of all the performed fits.
+Note: not all combinations of inputs will make sense, e.g. varying the pathlength and pressure simultaneously, since they act mostly on the same property of the spectrum. 
+
 # Licence
 
 CC-BY-SA-4.0
