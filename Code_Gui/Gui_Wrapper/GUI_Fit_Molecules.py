@@ -156,25 +156,26 @@ def main():
             pfit = np.polyfit(measdata[basetest*temptest,0], measdata[basetest*temptest,1], deg=1) #Then fit closer band to fitter baseline. 
             # print(pfit)
 
+        if 'tranlimit' in meta.keys():
+            fitrange *= (measdata[:,1] > float(meta['tranlimit']))
+
         if 'plotpars'in meta.keys():
             ppar = meta["plotpars"].replace(' ', '').split(',')
         else:
             ppar = []
 
         if 'measurement' in ppar:
-            lrang = (measdata[:,0] < float(meta["wmin"]))
-            urang = (measdata[:,0] > float(meta["wmax"]))
             fig, ax = plt.subplots() 
-            plt.title(os.path.split(meta["filename"])[1], fontsize=14)
+            plt.title(os.path.split(meta["filename"])[1], fontsize=12)
             plt.xlabel('Wavenumber (cm$^{-1}$)', fontsize=20)
             plt.ylabel('Transmittance', fontsize=20)
-            plt.plot(measdata[lrang,0], measdata[lrang,1], linestyle='-', marker='none', color='gray')                
-            plt.plot(measdata[urang,0], measdata[urang,1], linestyle='-', marker='none', color='gray')                            
+            plt.plot(measdata[:,0], measdata[:,1], linestyle='-', marker='none', color='gray')                
+            # plt.plot(measdata[urang,0], measdata[urang,1], linestyle='-', marker='none', color='gray')                            
             plt.plot(measdata[fitrange,0], measdata[fitrange,1], linestyle='-', marker='none', color='blue')   
             if 'corrbase' in meta.keys() and meta["corrbase"].lower() not in ['0', 'no', 'false']: 
                 plt.plot(measdata[:,0], pfit[0]*measdata[:,0] + pfit[1], linestyle='-', marker='none', color='red')        
                 plt.plot(measdata[basetest,0], measdata[basetest,1], linestyle='none', marker='o', markersize=1, markeredgecolor='orange', color='orange')        
-            plt.xlim(4000.0, 1000.0)
+            plt.xlim(4000.0, 500.0)
             plt.ylim(0.0, 1.05)    
             plt.savefig(meta["filename"].split('.')[0] + '_Meas' + pnam + '.png', transparent='False')
             plt.savefig(meta["filename"].split('.')[0] + '_Meas' + pnam + '.pdf', transparent='False')                
@@ -210,23 +211,25 @@ def main():
         
         tic()
         out = minimize(spectra_molecules_c, fpar, args=(measdata[fitrange,0], measdata[fitrange,1], specdict), method='leastq')#, max_nfev=1000)
-        ffit = spectra_molecules_c(out.params, measdata[fitrange,0], measdata[fitrange,1], specdict, test=True)
+        ffit = spectra_molecules_c(out.params, measdata[:,0], measdata[:,1], specdict, test=True)
         print("Total fitting time: {0:07.3f}s".format(toc()))
         print(fit_report(out))
 
         if 'fit' in ppar:      
             fig, ax = plt.subplots(2, sharex=True, height_ratios=np.array([3.0, 1.0])) 
-            ax[0].set_title(os.path.split(meta["filename"])[1], fontsize=14)
+            ax[0].set_title(os.path.split(meta["filename"])[1], fontsize=12)
 
             ax[0].set(xlabel='', ylabel='Transmittance')            
-            ax[1].set(xlabel='Wavenumber (cm$^{-1}$)', ylabel='Meas - fit (%)')    
+            ax[1].set(xlabel='Wavenumber (cm$^{-1}$)', ylabel='Meas - fit (%)') 
+            ax[0].plot(measdata[:,0], measdata[:,1], linestyle='-', marker='none', color='gray')    
             ax[0].plot(measdata[fitrange,0], measdata[fitrange,1], linestyle='-', marker='none', color='blue', label='Measurement')
-            ax[0].plot(measdata[fitrange,0], ffit, linestyle='-', marker='none', color='orange', label='Fit')#, $\sigma$ = ' + '{0:04.2f}'.format(out.params['w_g'].value) + ' cm$^{-1}$')
+            ax[0].plot(measdata[:,0], ffit, linestyle='-', marker='none', color='orange', label='Fit')#, $\sigma$ = ' + '{0:04.2f}'.format(out.params['w_g'].value) + ' cm$^{-1}$')
 
             hand, labl = ax[0].get_legend_handles_labels()
             ax[0].legend(hand, labl, loc='lower right', numpoints=1, prop={'size':14}, ncol=1)
 
-            ax[1].plot(measdata[fitrange,0], (measdata[fitrange,1] - ffit)*100.0, linestyle='-', marker='none', color='black')
+            ax[1].plot(measdata[:,0], (measdata[:,1] - ffit)*100.0, linestyle='-', marker='none', color='gray')
+            ax[1].plot(measdata[fitrange,0], (measdata[fitrange,1] - ffit[fitrange])*100.0, linestyle='-', marker='none', color='black')
             ax[0].set_xlim(float(meta["wmax"]), float(meta["wmin"]))
             ax[1].set_xlim(float(meta["wmax"]), float(meta["wmin"]))
             ax[0].set_ylim(0.0, 1.05)    
@@ -241,7 +244,8 @@ def main():
         for par in out.params: #Overwrite parameters with fit results
             tempdict[par] = out.params[par].value    
         # tempdict["molfinit"] = ','.join(['{0:07.5f}'.format(tempdict["c_" + mol]) for mol in fmol]) #Write fit parameters as initial values so that the output file can be directly used as input for an eventual refinement of the fit. 
-        tempdict["basefit"] = ','.join(['{0:07.5f}'.format(val) for val in pfit])
+        if 'corrbase' in meta.keys() and meta["corrbase"].lower() not in ['0', 'no', 'false']: #Baseline correction requested. -> cut off 50 % as signal.         
+            tempdict["basefit"] = ','.join(['{0:07.5f}'.format(val) for val in pfit])
 
         mind = ['nfev', 'covar', 'nvarys', 'ndata', 'nfree', 'aborted', 'success', 'errorbars', 'ier', 'message', 'method', 'chisqr', 'redchi', 'aic', 'bic', 'params', 'var_names', 'init_vals', 'init_values', 'call_kws']
         for a in dir(out):
