@@ -22,7 +22,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( __file__ ))))
 import Code_Gui.Gui_General_Code.General_Functions_Library as GFL
 import Code_Gui.Gui_General_Code.Gas_Mixtures_Spectra_Library as GMSL
 
-import spectrochempy as spectrochempy
+# import spectrochempy as spectrochempy
 
 def read_FTIR_measurement(fnam): 
     """
@@ -99,7 +99,7 @@ def spectra_molecules_c(pars: Parameters, w_meas, t_meas, s, test=False):
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        spec_new.resample(w_meas, inplace=True, energy_threshold=0.025)     # Resample spectrum object onto experimental spectrum, to be able to compare them
+        spec_new.resample(w_meas, inplace=True, energy_threshold=2.0)     # Resample spectrum object onto experimental spectrum, to be able to compare them
 
     w_new, t_new = spec_new.get("transmittance")     # Get necessary list with wavenumbers and transmission
     t_new[np.isnan(t_new)] = 1.0     # if any non-numbers exist within the spectra, change these into a no-molecule zone (transmission = 1)
@@ -179,7 +179,10 @@ def main():
             plt.ylim(0.0, 1.05)    
             plt.savefig(meta["filename"].split('.')[0] + '_Meas' + pnam + '.png', transparent='False')
             plt.savefig(meta["filename"].split('.')[0] + '_Meas' + pnam + '.pdf', transparent='False')                
-            plt.show()
+            if "skipplot" in meta.keys() and meta["skipplot"].lower() not in ['0', 'no', 'false']:
+                plt.close()
+            else:
+                plt.show()  
 
         if 'corrbase' in meta.keys() and meta["corrbase"].lower() not in ['0', 'no', 'false']: #Baseline correction requested. -> cut off 50 % as signal. 
             measdata[:,1] -= (pfit[0]*measdata[:,0] + pfit[1]) - 1.0 #Tranmittance should be 1 on baseline!            
@@ -207,8 +210,8 @@ def main():
                                                         pres=float(meta["pressure"]), temp=float(meta["temperature"]),
                                                         path_l=float(meta["pathlength"]),
                                                         wl_min=float(meta["wmin"]), wl_max=float(meta["wmax"]), step=float(meta["calcres"]))
-            fpar.add('c_' + mol, value=float(molf[i]), min=1.0E-12, max=2, vary=not 'c_' + mol in fixp)
-        
+            fpar.add('c_' + mol, value=float(molf[i]), min=1.0E-9, max=2, vary=not 'c_' + mol in fixp) #1 ppb = 0 ppb
+
         tic()
         out = minimize(spectra_molecules_c, fpar, args=(measdata[fitrange,0], measdata[fitrange,1], specdict), method='leastq')#, max_nfev=1000)
         ffit = spectra_molecules_c(out.params, measdata[:,0], measdata[:,1], specdict, test=True)
@@ -236,7 +239,10 @@ def main():
             ax[1].set_ylim(-10.0, +10.0)                
             plt.savefig(meta["filename"].split('.')[0] + '_Fit' + pnam + '.png', transparent='False')
             plt.savefig(meta["filename"].split('.')[0] + '_Fit' + pnam + '.pdf', transparent='False')        
-            plt.show()  
+            if "skipplot" in meta.keys() and meta["skipplot"].lower() not in ['0', 'no', 'false']:
+                plt.close()
+            else:
+                plt.show()  
 
         tempdict = {}
         for key in meta: #Copy input parameters for trackability
@@ -272,7 +278,7 @@ def main():
                 templist.append(0.0)
         savedata.append(templist)
 
-    with open(sys.argv[1].replace('.json', '.csv'), mode='w', newline='') as file:
+    with open(sys.argv[1].split('.')[0] + '.csv', mode='w', newline='') as file:
         csv_writer = csv.writer(file) 
         csv_writer.writerows(savedata)
 
