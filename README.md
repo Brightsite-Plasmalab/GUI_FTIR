@@ -132,7 +132,8 @@ The input file contains the following optional parameters:
 - **plotpars:** requested plots. Choose from either/or/neither: `"measurement,fit"`.
 - **plotname:** additional string to be appended to saved files to distinguish different fits of the same input spectrum.
 - **corrbase:** request baseline correction with e.g. `"yes"`.
-- **tranlimit:** exclude points with a transmission below this value from the fit, e.g. due to saturation issues. 
+- **tranlimit:** exclude points with a transmission below this value from the fit, e.g. due to saturation issues.
+- **skipplot:** skip all plots.
 
 The fit will give command-line output to inform the user of the timing and output of the fit. Additionally, a JSON output file is written for each fit, in the same folder as the input data. An overview CSV file is created with next to the input JSON file with a summary of all the performed fits.
 Note: not all combinations of inputs will make sense, e.g. varying the pathlength and pressure simultaneously, since they act mostly on the same property of the spectrum. 
