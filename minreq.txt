@@ -5,3 +5,4 @@ PySide6
 brukeropusreader
 pyqtgraph
 pip-system-certs
+spectrochempy
