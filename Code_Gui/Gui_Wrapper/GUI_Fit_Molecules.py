@@ -301,7 +301,7 @@ def main():
             out = minimize(spectra_molecules_c, fpar, args=(measdata[fitrange,0], measdata[fitrange,1], specdict), method='leastq')#, max_nfev=10)#, max_nfev=1000)
             ffit = spectra_molecules_c(out.params, measdata[:,0], measdata[:,1], specdict, test=True)            
 
-            if meta['method'].lower() in ['opt']:  #Not possible to recalculate broadening coefficients every n steps. -> one cannot rescale the mole fraction of a combined spectrum!
+            if 'method' in meta.keys() and meta['method'].lower() in ['opt']:  #Not possible to recalculate broadening coefficients every n steps. -> one cannot rescale the mole fraction of a combined spectrum!
                 # print("Prefit with static broadening coefficients: {0:07.3f}s".format(toc()))
                 # print({nam[2::]: par.value for nam, par in fpar.items() if nam.startswith('c_')})
                 # npar = 
