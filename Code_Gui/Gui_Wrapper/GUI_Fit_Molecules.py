@@ -223,6 +223,25 @@ def main():
         else:
             pnam = ''
 
+        if 'reuse' in meta.keys() and meta['reuse'].lower() in ['yes', 'true', '1']: #Try to load old fit if reuse is requested, otherwise fits are simply done new. 
+            try: 
+                with open(meta["filename"].rsplit('.', 1)[0] + '_Fit' + pnam + '.json', 'r') as fp:
+                    tempdict = json.load(fp)
+
+                templist = []
+                for key in savelabs:
+                    if key in tempdict.keys():
+                        templist.append(tempdict[key])
+                    else:
+                        templist.append(0.0)
+                savedata.append(templist)
+
+                print(meta["filename"].rsplit('.', 1)[0] + '_Fit' + pnam + '.json used to load existing fit')
+
+                continue #This is a little ugly, if the json file exists, it just copies the values, skips all the rest of the data processing, and continues to fit the next spectrum. 
+            except: 
+                print(meta["filename"].rsplit('.', 1)[0] + '_Fit' + pnam + '.json not found or failed to load, continuing to fit')
+       
         measdata = read_FTIR_measurement(meta["filename"])
         fitrange = (measdata[:,0] > float(meta["wmin"]))*(measdata[:,0] < float(meta["wmax"]))
 
@@ -492,7 +511,7 @@ def main():
                 
         pprint(tempdict)
 
-        with open(meta["filename"].split('.')[0] + '_Fit' + pnam + '.json', 'w') as fp:
+        with open(meta["filename"].rsplit('.', 1)[0] + '_Fit' + pnam + '.json', 'w') as fp:
             json.dump(tempdict, fp, indent=4)
 
         templist = []
@@ -503,7 +522,7 @@ def main():
                 templist.append(0.0)
         savedata.append(templist)
 
-    with open(sys.argv[1].split('.')[0] + '.csv', mode='w', newline='') as file:
+    with open(sys.argv[1].rsplit('.', 1)[0] + '.csv', mode='w', newline='') as file:
         csv_writer = csv.writer(file) 
         csv_writer.writerows(savedata)
 
