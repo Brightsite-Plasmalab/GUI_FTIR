@@ -4,43 +4,28 @@ Fully open source Gui made for FTIR simulation/data analysis. Both are done via 
 # Installation
 
 ## Windows
-Download for windows:
 
-Step1: Download Chocolatey
-- Open Windows PowerShell as Administrator
-- Run: `Get-ExecutionPolicy`
-	- if answer == restricted -> Set-ExecutionPolicy UnRestricted
-- Run: `Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))`
-- Test by Typing: `choco`
+Step 1: install python
+- Install the python install manager from the app store: https://apps.microsoft.com/detail/9nq7512cxl7t
+- Open a Command Prompt by typing `cmd` in start
+- Install python 3.11: `py install 3.11`
 
-
-Step 2: Download python 3.9
-- Run: `choco install python39`
-
-Step 3: Find where python 3.9 has been installed. Often found at C:/Python39
-
-Step 4: Create folder for python environment
-
-Step 5: Download Github Files
+Step 2: download github files
 - Download as Zip
 - Extract Zip
-- Place files within new folder into the folder for the python environment
+- Place files within a convenient local folder
 
+Step 3: create python virtual environment
+- Open a Command Prompt by typing `cmd` in start
+- Go to the local folder where you placed the files in step 2 by running: `cd [path_to_folder]`
+- Create the virtual environment by running: `python3.11 -m venv .venv`
+- Activate the virtual environment by running: `.venv\Scripts\activate`
+- Install required packages: `pip install -r minreq.txt`
 
-Step 6: Go to created folder within terminal
-- Run: `cd [path_to_folder]`
-
-Step 7: Create environment 
-- Run: `[1] -m venv .venv39`
-	- 1 = path to python 3.9 -> C:\python39\python.exe
-
-Step 8: Activate environment
-- Run: `.venv39/Scripts/activate` 
-
-Step 8:Install necessary requirements.
-- Run: `pip install -r requirement.txt`
-
-Step 9: Start the GUI
+Step 4: activate the environment and start the GUI
+- Open a Command Prompt by typing `cmd` in start
+- Go to the local folder where you placed the files in step 2 by running: `cd [path_to_folder]`
+- Activate the virtual environment by running: `.venv\Scripts\activate`
 - Run: `python python -m Code_Gui.FTIR_GUI`
  
 ## MacOS
